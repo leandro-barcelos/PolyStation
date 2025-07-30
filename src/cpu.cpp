@@ -13,8 +13,7 @@ void cpu::CPU::Cycle() {
       uint32_t register_index = instruction >> 16U & 0x1FU;
       uint16_t immediate = instruction & 0xFFFFU;
 
-      std::cout << std::format("lui {:02X}, {:04X}", instruction,
-                               register_index, immediate)
+      std::cout << std::format("lui {:02X}, {:04X}", register_index, immediate)
                 << '\n';
 
       gsl::at(registers_, register_index) = immediate << 16U;
