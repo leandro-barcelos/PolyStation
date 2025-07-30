@@ -15,6 +15,6 @@ int main(int argc, char* argv[]) {
   cpu::CPU cpu{path};
 
   while (true) {
-    cpu.cycle();
+    cpu.Cycle();
   }
 }
