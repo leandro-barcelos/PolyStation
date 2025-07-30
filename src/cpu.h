@@ -8,8 +8,6 @@
 namespace cpu {
 constexpr uint32_t kNumberOfRegisters = 32;
 constexpr uint32_t kInstructionLength = 4;
-constexpr uint8_t kOriOpcode = 0x0D;
-constexpr uint8_t kLuiOpcode = 0x0F;
 
 class CPU {
  public:
@@ -29,10 +27,15 @@ class Instruction {
  public:
   explicit Instruction(const uint32_t instruction) : data_(instruction) {}
 
-  [[nodiscard]] uint8_t Opcode() const;
-  [[nodiscard]] uint8_t RegisterS() const;
-  [[nodiscard]] uint8_t RegisterT() const;
-  [[nodiscard]] uint16_t Immediate16() const;
+  enum class Opcode : uint8_t {
+    kOriOpcode = 0x0D,
+    kLuiOpcode = 0x0F,
+  };
+
+  [[nodiscard]] Opcode GetOpcode() const;
+  [[nodiscard]] uint8_t GetRegisterS() const;
+  [[nodiscard]] uint8_t GetRegisterT() const;
+  [[nodiscard]] uint16_t GetImmediate16() const;
 
  private:
   uint32_t data_;
