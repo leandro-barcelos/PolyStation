@@ -27,10 +27,7 @@ class Instruction {
  public:
   explicit Instruction(const uint32_t instruction) : data_(instruction) {}
 
-  enum class Opcode : uint8_t {
-    kOriOpcode = 0x0D,
-    kLuiOpcode = 0x0F,
-  };
+  enum class Opcode : uint8_t { kORI = 0x0D, kLUI = 0x0F };
 
   [[nodiscard]] Opcode GetOpcode() const;
   [[nodiscard]] uint8_t GetRegisterS() const;

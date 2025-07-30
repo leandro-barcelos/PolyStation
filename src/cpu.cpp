@@ -9,7 +9,7 @@ void cpu::CPU::Cycle() {
   program_counter_ += cpu::kInstructionLength;
 
   switch (instruction.GetOpcode()) {
-    case Instruction::Opcode::kOriOpcode: {
+    case Instruction::Opcode::kORI: {
       uint32_t register_s = instruction.GetRegisterS();
       uint32_t register_t = instruction.GetRegisterT();
       uint16_t immediate = instruction.GetImmediate16();
@@ -23,7 +23,7 @@ void cpu::CPU::Cycle() {
 
       break;
     }
-    case Instruction::Opcode::kLuiOpcode: {
+    case Instruction::Opcode::kLUI: {
       uint32_t register_t = instruction.GetRegisterT();
       uint16_t immediate = instruction.GetImmediate16();
 
