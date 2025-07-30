@@ -1,7 +1,5 @@
 #include <iostream>
 
-#include "bios.h"
-#include "bus.h"
 #include "cpu.h"
 
 int main(int argc, char* argv[]) {

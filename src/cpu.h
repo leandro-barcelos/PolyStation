@@ -24,6 +24,19 @@ class CPU {
 
   [[nodiscard]] uint32_t Load(uint32_t address) const;
 };
+
+class Instruction {
+ public:
+  explicit Instruction(const uint32_t instruction) : data_(instruction) {}
+
+  [[nodiscard]] uint8_t Opcode() const;
+  [[nodiscard]] uint8_t RegisterS() const;
+  [[nodiscard]] uint8_t RegisterT() const;
+  [[nodiscard]] uint16_t Immediate16() const;
+
+ private:
+  uint32_t data_;
+};
 }  // namespace cpu
 
 #endif  // POLYSTATION_CPU_H_
