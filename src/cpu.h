@@ -8,7 +8,8 @@
 namespace cpu {
 constexpr uint32_t kNumberOfRegisters = 32;
 constexpr uint32_t kInstructionLength = 4;
-constexpr uint32_t kLuiOpcode = 0x0F;
+constexpr uint8_t kOriOpcode = 0x0D;
+constexpr uint8_t kLuiOpcode = 0x0F;
 
 class CPU {
  public:
