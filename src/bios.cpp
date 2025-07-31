@@ -2,10 +2,12 @@
 
 #include <fstream>
 
+#include "bus.h"
+
 bios::Bios::Bios(const std::string& path) {
-  data_.resize(kBiosSize);
+  data_.resize(bus::kBiosSize);
   std::ifstream input(path, std::ios::binary);
-  input.read(reinterpret_cast<char*>(data_.data()), kBiosSize);
+  input.read(reinterpret_cast<char*>(data_.data()), bus::kBiosSize);
   input.close();
 }
 

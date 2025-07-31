@@ -4,9 +4,6 @@
 #include <vector>
 
 namespace bios {
-constexpr uint32_t kBiosBase = 0xBFC00000;
-constexpr uint64_t kBiosSize = 0x80000;
-
 class Bios {
  public:
   explicit Bios(const std::string& path);

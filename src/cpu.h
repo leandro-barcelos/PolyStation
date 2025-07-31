@@ -16,7 +16,7 @@ class CPU {
   void Cycle();
 
  private:
-  uint32_t program_counter_ = bios::kBiosBase;
+  uint32_t program_counter_ = bus::kBiosBase;
   std::array<uint32_t, kNumberOfRegisters> registers_{};
   bus::Bus bus_;
 

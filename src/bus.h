@@ -6,6 +6,8 @@
 
 namespace bus {
 enum class MemoryRegion { kBios };
+constexpr uint32_t kBiosBase = 0xBFC00000;
+constexpr uint32_t kBiosSize = 0x80000;
 
 std::optional<MemoryRegion> GetMemoryRegionByAddress(uint32_t address);
 
