@@ -9,21 +9,6 @@ namespace cpu {
 constexpr uint32_t kNumberOfRegisters = 32;
 constexpr uint32_t kInstructionLength = 4;
 
-class CPU {
- public:
-  explicit CPU(const std::string& path) : bus_(path) {}
-
-  void Cycle();
-
- private:
-  uint32_t program_counter_ = bus::kBiosBase;
-  std::array<uint32_t, kNumberOfRegisters> registers_{};
-  bus::Bus bus_;
-
-  [[nodiscard]] uint32_t Load(uint32_t address) const;
-  static void Store(uint32_t address, uint32_t value);
-};
-
 class Instruction {
  public:
   explicit Instruction(const uint32_t instruction) : data_(instruction) {}
@@ -37,6 +22,25 @@ class Instruction {
 
  private:
   uint32_t data_;
+};
+
+class CPU {
+ public:
+  explicit CPU(const std::string& path) : bus_(path) {}
+
+  void Cycle();
+
+ private:
+  uint32_t program_counter_ = bus::kBiosBase;
+  std::array<uint32_t, kNumberOfRegisters> registers_{};
+  bus::Bus bus_;
+
+  [[nodiscard]] uint32_t Load(uint32_t address) const;
+  static void Store(uint32_t address, uint32_t value);
+
+  void OpORI(const Instruction& instruction);
+  void OpLUI(const Instruction& instruction);
+  void OpSW(const Instruction& instruction);
 };
 }  // namespace cpu
 
