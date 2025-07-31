@@ -11,6 +11,9 @@ void cpu::CPU::Cycle() {
   switch (instruction.GetPrimaryOpcode()) {
     case Instruction::PrimaryOpcode::kSPECIAL:
       switch (instruction.GetSecondaryOpcode()) {
+        case Instruction::SecondaryOpcode::kSLL:
+          OpSLL(instruction);
+          break;
         default:
           throw std::runtime_error(std::format(
               "unhandled secondary opcode {:02X}",
@@ -75,6 +78,19 @@ void cpu::CPU::OpSW(const Instruction& instruction) {
             << '\n';
 }
 
+void cpu::CPU::OpSLL(const Instruction& instruction) {
+  uint32_t register_t = instruction.GetRegisterT();
+  uint32_t register_d = instruction.GetRegisterD();
+  uint16_t immediate = instruction.GetImmediate16();
+
+  gsl::at(registers_, register_d) = gsl::at(registers_, register_t)
+                                    << immediate;
+
+  std::cout << std::format("sll {:02X}, {:02X}, {:04X}", register_d, register_t,
+                           immediate)
+            << '\n';
+}
+
 cpu::Instruction::PrimaryOpcode cpu::Instruction::GetPrimaryOpcode() const {
   return static_cast<PrimaryOpcode>(data_ >> 26U & 0x3FU);
 }
@@ -86,5 +102,7 @@ cpu::Instruction::SecondaryOpcode cpu::Instruction::GetSecondaryOpcode() const {
 uint8_t cpu::Instruction::GetRegisterS() const { return data_ >> 21U & 0x1FU; }
 
 uint8_t cpu::Instruction::GetRegisterT() const { return data_ >> 16U & 0x1FU; }
+
+uint8_t cpu::Instruction::GetRegisterD() const { return data_ >> 11U & 0x1FU; }
 
 uint16_t cpu::Instruction::GetImmediate16() const { return data_ & 0xFFFFU; }

@@ -20,12 +20,13 @@ class Instruction {
     kSW = 0x2B
   };
 
-  enum class SecondaryOpcode : uint8_t {};
+  enum class SecondaryOpcode : uint8_t { kSLL = 0x00 };
 
   [[nodiscard]] PrimaryOpcode GetPrimaryOpcode() const;
   [[nodiscard]] SecondaryOpcode GetSecondaryOpcode() const;
   [[nodiscard]] uint8_t GetRegisterS() const;
   [[nodiscard]] uint8_t GetRegisterT() const;
+  [[nodiscard]] uint8_t GetRegisterD() const;
   [[nodiscard]] uint16_t GetImmediate16() const;
 
  private:
@@ -49,6 +50,7 @@ class CPU {
   void OpORI(const Instruction& instruction);
   void OpLUI(const Instruction& instruction);
   void OpSW(const Instruction& instruction);
+  void OpSLL(const Instruction& instruction);
 };
 }  // namespace cpu
 
