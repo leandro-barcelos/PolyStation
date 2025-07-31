@@ -13,7 +13,7 @@ void cpu::CPU::Cycle() {
       switch (instruction.GetSecondaryOpcode()) {
         default:
           throw std::runtime_error(std::format(
-              "unhandled secondary opcode {:03X}",
+              "unhandled secondary opcode {:02X}",
               static_cast<uint8_t>(instruction.GetSecondaryOpcode())));
       }
       break;
@@ -28,7 +28,7 @@ void cpu::CPU::Cycle() {
       break;
     default:
       throw std::runtime_error(
-          std::format("unhandled primary opcode {:03X}",
+          std::format("unhandled primary opcode {:02X}",
                       static_cast<uint8_t>(instruction.GetPrimaryOpcode())));
   }
 }
