@@ -13,9 +13,17 @@ class Instruction {
  public:
   explicit Instruction(const uint32_t instruction) : data_(instruction) {}
 
-  enum class Opcode : uint8_t { kORI = 0x0D, kLUI = 0x0F, kSW = 0x2B };
+  enum class PrimaryOpcode : uint8_t {
+    kSPECIAL = 0x00,
+    kORI = 0x0D,
+    kLUI = 0x0F,
+    kSW = 0x2B
+  };
 
-  [[nodiscard]] Opcode GetOpcode() const;
+  enum class SecondaryOpcode : uint8_t {};
+
+  [[nodiscard]] PrimaryOpcode GetPrimaryOpcode() const;
+  [[nodiscard]] SecondaryOpcode GetSecondaryOpcode() const;
   [[nodiscard]] uint8_t GetRegisterS() const;
   [[nodiscard]] uint8_t GetRegisterT() const;
   [[nodiscard]] uint16_t GetImmediate16() const;

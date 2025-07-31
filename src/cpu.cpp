@@ -6,22 +6,30 @@
 
 void cpu::CPU::Cycle() {
   const Instruction instruction{Load(program_counter_)};
-  program_counter_ += cpu::kInstructionLength;
+  program_counter_ += kInstructionLength;
 
-  switch (instruction.GetOpcode()) {
-    case Instruction::Opcode::kORI:
+  switch (instruction.GetPrimaryOpcode()) {
+    case Instruction::PrimaryOpcode::kSPECIAL:
+      switch (instruction.GetSecondaryOpcode()) {
+        default:
+          throw std::runtime_error(std::format(
+              "unhandled secondary opcode {:03X}",
+              static_cast<uint8_t>(instruction.GetSecondaryOpcode())));
+      }
+      break;
+    case Instruction::PrimaryOpcode::kORI:
       OpORI(instruction);
       break;
-    case Instruction::Opcode::kLUI:
+    case Instruction::PrimaryOpcode::kLUI:
       OpLUI(instruction);
       break;
-    case Instruction::Opcode::kSW:
+    case Instruction::PrimaryOpcode::kSW:
       OpSW(instruction);
       break;
     default:
       throw std::runtime_error(
-          std::format("unhandled instruction {:03X}",
-                      static_cast<uint8_t>(instruction.GetOpcode())));
+          std::format("unhandled primary opcode {:03X}",
+                      static_cast<uint8_t>(instruction.GetPrimaryOpcode())));
   }
 }
 
@@ -67,8 +75,12 @@ void cpu::CPU::OpSW(const Instruction& instruction) {
             << '\n';
 }
 
-cpu::Instruction::Opcode cpu::Instruction::GetOpcode() const {
-  return static_cast<Opcode>(data_ >> 26U & 0x3FU);
+cpu::Instruction::PrimaryOpcode cpu::Instruction::GetPrimaryOpcode() const {
+  return static_cast<PrimaryOpcode>(data_ >> 26U & 0x3FU);
+}
+
+cpu::Instruction::SecondaryOpcode cpu::Instruction::GetSecondaryOpcode() const {
+  return static_cast<SecondaryOpcode>(data_ & 0x3FU);
 }
 
 uint8_t cpu::Instruction::GetRegisterS() const { return data_ >> 21U & 0x1FU; }
