@@ -21,13 +21,14 @@ class CPU {
   bus::Bus bus_;
 
   [[nodiscard]] uint32_t Load(uint32_t address) const;
+  static void Store(uint32_t address, uint32_t value);
 };
 
 class Instruction {
  public:
   explicit Instruction(const uint32_t instruction) : data_(instruction) {}
 
-  enum class Opcode : uint8_t { kORI = 0x0D, kLUI = 0x0F };
+  enum class Opcode : uint8_t { kORI = 0x0D, kLUI = 0x0F, kSW = 0x2B };
 
   [[nodiscard]] Opcode GetOpcode() const;
   [[nodiscard]] uint8_t GetRegisterS() const;

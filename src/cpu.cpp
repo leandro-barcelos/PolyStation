@@ -33,6 +33,20 @@ void cpu::CPU::Cycle() {
       gsl::at(registers_, register_t) = immediate << 16U;
       break;
     }
+    case Instruction::Opcode::kSW: {
+      uint32_t register_s = instruction.GetRegisterS();
+      uint32_t register_t = instruction.GetRegisterT();
+      uint16_t immediate = instruction.GetImmediate16();
+
+      const uint32_t address = gsl::at(registers_, register_s) + immediate;
+      Store(address, gsl::at(registers_, register_t));
+
+      std::cout << std::format("sw {:02X}, {:04X}({:02X})", register_t,
+                               immediate, register_s)
+                << '\n';
+
+      break;
+    }
     default:
       throw std::runtime_error(
           std::format("unhandled instruction {:03X}",
@@ -42,6 +56,9 @@ void cpu::CPU::Cycle() {
 
 uint32_t cpu::CPU::Load(const uint32_t address) const {
   return bus_.Load(address);
+}
+void cpu::CPU::Store(const uint32_t address, const uint32_t value) {
+  bus::Bus::Store(address, value);
 }
 
 cpu::Instruction::Opcode cpu::Instruction::GetOpcode() const {
