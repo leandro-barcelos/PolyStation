@@ -20,6 +20,9 @@ void cpu::CPU::Cycle() {
               static_cast<uint8_t>(instruction.GetSecondaryOpcode())));
       }
       break;
+    case Instruction::PrimaryOpcode::kADDIU:
+      OpADDIU(instruction);
+      break;
     case Instruction::PrimaryOpcode::kORI:
       OpORI(instruction);
       break;
@@ -88,6 +91,18 @@ void cpu::CPU::OpSLL(const Instruction& instruction) {
 
   std::cout << std::format("sll {:02X}, {:02X}, {:04X}", register_d, register_t,
                            immediate)
+            << '\n';
+}
+
+void cpu::CPU::OpADDIU(const Instruction& instruction) {
+  uint32_t register_t = instruction.GetRegisterT();
+  uint32_t register_s = instruction.GetRegisterS();
+  uint16_t immediate = instruction.GetImmediate16();
+
+  gsl::at(registers_, register_t) = gsl::at(registers_, register_s) + immediate;
+
+  std::cout << std::format("addiu {:02X}, {:02X}, {:04X}", register_t,
+                           register_s, immediate)
             << '\n';
 }
 

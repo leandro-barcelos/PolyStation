@@ -15,6 +15,7 @@ class Instruction {
 
   enum class PrimaryOpcode : uint8_t {
     kSPECIAL = 0x00,
+    kADDIU = 0x09,
     kORI = 0x0D,
     kLUI = 0x0F,
     kSW = 0x2B
@@ -52,6 +53,7 @@ class CPU {
   void OpLUI(const Instruction& instruction);
   void OpSW(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
+  void OpADDIU(const Instruction& instruction);
 };
 }  // namespace cpu
 
