@@ -9,8 +9,9 @@ constexpr uint32_t kBiosBase = 0xBFC00000;
 constexpr uint32_t kBiosSize = 0x80000;
 constexpr uint32_t kMemoryControlBase = 0x1F801000;
 constexpr uint32_t kMemoryControlSize = 0x24;
+constexpr uint32_t kRamSizeBase = 0x1F801060;
 
-enum class MemoryRegion : uint8_t { kBios, kMemoryControl };
+enum class MemoryRegion : uint8_t { kBios, kMemoryControl, kRamSize };
 
 std::optional<MemoryRegion> GetMemoryRegionByAddress(uint32_t address);
 
