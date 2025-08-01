@@ -52,8 +52,8 @@ void cpu::CPU::Store(const uint32_t address, const uint32_t value) {
 }
 
 void cpu::CPU::OpORI(const Instruction& instruction) {
-  uint32_t register_s = instruction.GetRegisterS();
-  uint32_t register_t = instruction.GetRegisterT();
+  uint8_t register_s = instruction.GetRegisterS();
+  uint8_t register_t = instruction.GetRegisterT();
   uint16_t immediate = instruction.GetImmediate16();
 
   gsl::at(registers_, register_t) = gsl::at(registers_, register_s) | immediate;
@@ -64,7 +64,7 @@ void cpu::CPU::OpORI(const Instruction& instruction) {
 }
 
 void cpu::CPU::OpLUI(const Instruction& instruction) {
-  uint32_t register_t = instruction.GetRegisterT();
+  uint8_t register_t = instruction.GetRegisterT();
   uint16_t immediate = instruction.GetImmediate16();
 
   gsl::at(registers_, register_t) = immediate << 16U;
@@ -73,9 +73,9 @@ void cpu::CPU::OpLUI(const Instruction& instruction) {
 }
 
 void cpu::CPU::OpSW(const Instruction& instruction) {
-  uint32_t register_s = instruction.GetRegisterS();
-  uint32_t register_t = instruction.GetRegisterT();
-  uint16_t immediate = instruction.GetImmediate16SignExtend();
+  uint8_t register_s = instruction.GetRegisterS();
+  uint8_t register_t = instruction.GetRegisterT();
+  uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   const uint32_t address = gsl::at(registers_, register_s) + immediate;
   Store(address, gsl::at(registers_, register_t));
@@ -86,7 +86,7 @@ void cpu::CPU::OpSW(const Instruction& instruction) {
 }
 
 void cpu::CPU::OpSLL(const Instruction& instruction) {
-  uint32_t register_t = instruction.GetRegisterT();
+  uint8_t register_t = instruction.GetRegisterT();
   uint32_t register_d = instruction.GetRegisterD();
   uint16_t immediate = instruction.GetImmediate16();
 
@@ -99,8 +99,8 @@ void cpu::CPU::OpSLL(const Instruction& instruction) {
 }
 
 void cpu::CPU::OpADDIU(const Instruction& instruction) {
-  uint32_t register_t = instruction.GetRegisterT();
-  uint32_t register_s = instruction.GetRegisterS();
+  uint8_t register_t = instruction.GetRegisterT();
+  uint8_t register_s = instruction.GetRegisterS();
   uint16_t immediate = instruction.GetImmediate16();
 
   gsl::at(registers_, register_t) = gsl::at(registers_, register_s) + immediate;
