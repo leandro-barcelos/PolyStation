@@ -15,10 +15,12 @@ class Instruction {
 
   enum class PrimaryOpcode : uint8_t {
     kSPECIAL = 0x00,
+    kJ = 0x02,
     kADDIU = 0x09,
     kORI = 0x0D,
     kLUI = 0x0F,
-    kSW = 0x2B
+    kSW = 0x2B,
+    kNOP = 0xFF
   };
 
   enum class SecondaryOpcode : uint8_t { kSLL = 0x00 };
@@ -30,6 +32,7 @@ class Instruction {
   [[nodiscard]] uint8_t GetRegisterD() const;
   [[nodiscard]] uint16_t GetImmediate16() const;
   [[nodiscard]] uint32_t GetImmediate16SignExtend() const;
+  [[nodiscard]] uint32_t GetImmediate26() const;
 
  private:
   uint32_t data_;
@@ -43,6 +46,7 @@ class CPU {
 
  private:
   uint32_t program_counter_ = bus::kBiosBase;
+  Instruction next_instruction_{0x0};
   std::array<uint32_t, kNumberOfRegisters> registers_{};
   bus::Bus bus_;
 
@@ -54,6 +58,7 @@ class CPU {
   void OpSW(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
   void OpADDIU(const Instruction& instruction);
+  void OpJ(const Instruction& instruction);
 };
 }  // namespace cpu
 

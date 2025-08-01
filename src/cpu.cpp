@@ -5,7 +5,8 @@
 #include <iostream>
 
 void cpu::CPU::Cycle() {
-  const Instruction instruction{Load(program_counter_)};
+  const Instruction instruction = next_instruction_;
+  next_instruction_ = Instruction(Load(program_counter_));
   program_counter_ += kInstructionLength;
 
   switch (instruction.GetPrimaryOpcode()) {
@@ -19,6 +20,9 @@ void cpu::CPU::Cycle() {
               "unhandled secondary opcode {:02X}",
               static_cast<uint8_t>(instruction.GetSecondaryOpcode())));
       }
+      break;
+    case Instruction::PrimaryOpcode::kJ:
+      OpJ(instruction);
       break;
     case Instruction::PrimaryOpcode::kADDIU:
       OpADDIU(instruction);
@@ -106,6 +110,14 @@ void cpu::CPU::OpADDIU(const Instruction& instruction) {
             << '\n';
 }
 
+void cpu::CPU::OpJ(const Instruction& instruction) {
+  uint32_t immediate = instruction.GetImmediate26();
+
+  program_counter_ = (program_counter_ & 0xF0000000) | (immediate << 2U);
+
+  std::cout << std::format("j {:07X}", immediate) << '\n';
+}
+
 cpu::Instruction::PrimaryOpcode cpu::Instruction::GetPrimaryOpcode() const {
   return static_cast<PrimaryOpcode>(data_ >> 26U & 0x3FU);
 }
@@ -126,3 +138,5 @@ uint32_t cpu::Instruction::GetImmediate16SignExtend() const {
   const auto value = static_cast<int16_t>(data_ & 0xFFFFU);
   return static_cast<uint32_t>(value);
 }
+
+uint32_t cpu::Instruction::GetImmediate26() const { return data_ & 0x3FFFFFFU; }
