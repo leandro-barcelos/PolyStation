@@ -68,7 +68,7 @@ void cpu::CPU::OpLUI(const Instruction& instruction) {
 void cpu::CPU::OpSW(const Instruction& instruction) {
   uint32_t register_s = instruction.GetRegisterS();
   uint32_t register_t = instruction.GetRegisterT();
-  uint16_t immediate = instruction.GetImmediate16();
+  uint16_t immediate = instruction.GetImmediate16SignExtend();
 
   const uint32_t address = gsl::at(registers_, register_s) + immediate;
   Store(address, gsl::at(registers_, register_t));
@@ -106,3 +106,8 @@ uint8_t cpu::Instruction::GetRegisterT() const { return data_ >> 16U & 0x1FU; }
 uint8_t cpu::Instruction::GetRegisterD() const { return data_ >> 11U & 0x1FU; }
 
 uint16_t cpu::Instruction::GetImmediate16() const { return data_ & 0xFFFFU; }
+
+uint32_t cpu::Instruction::GetImmediate16SignExtend() const {
+  const auto value = static_cast<int16_t>(data_ & 0xFFFFU);
+  return static_cast<uint32_t>(value);
+}

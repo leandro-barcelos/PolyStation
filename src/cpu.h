@@ -28,6 +28,7 @@ class Instruction {
   [[nodiscard]] uint8_t GetRegisterT() const;
   [[nodiscard]] uint8_t GetRegisterD() const;
   [[nodiscard]] uint16_t GetImmediate16() const;
+  [[nodiscard]] uint32_t GetImmediate16SignExtend() const;
 
  private:
   uint32_t data_;
