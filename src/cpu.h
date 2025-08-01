@@ -37,7 +37,7 @@ class Instruction {
 
 class CPU {
  public:
-  explicit CPU(const std::string& path) : bus_(path) {}
+  explicit CPU(const std::string& path) : bus_(path) { registers_[0] = 0; }
 
   void Cycle();
 
