@@ -63,11 +63,13 @@ void bus::Bus::Store(uint32_t address, uint32_t value) {
             throw std::runtime_error(std::format(
                 "tried remapping expansion 1 base address to {:08X}", value));
           }
+          break;
         case 4:
-          if (value != 0x1f02000) {
+          if (value != 0x1f802000) {
             throw std::runtime_error(std::format(
                 "tried remapping expansion 2 base address to {:08X}", value));
           }
+          break;
         default:
           std::cout << "unhandled write to memory control 1" << '\n';
           break;
