@@ -15,6 +15,9 @@ void cpu::CPU::Cycle() {
         case Instruction::SecondaryOpcode::kSLL:
           OpSLL(instruction);
           break;
+        case Instruction::SecondaryOpcode::kOR:
+          OpOR(instruction);
+          break;
         default:
           throw std::runtime_error(std::format(
               "unhandled secondary opcode {:02X}",
@@ -116,6 +119,19 @@ void cpu::CPU::OpJ(const Instruction& instruction) {
   program_counter_ = (program_counter_ & 0xF0000000) | (immediate << 2U);
 
   std::cout << std::format("j {:07X}", immediate) << '\n';
+}
+
+void cpu::CPU::OpOR(const Instruction& instruction) {
+  uint8_t register_s = instruction.GetRegisterS();
+  uint8_t register_t = instruction.GetRegisterT();
+  uint8_t register_d = instruction.GetRegisterD();
+
+  gsl::at(registers_, register_d) =
+      gsl::at(registers_, register_s) | gsl::at(registers_, register_t);
+
+  std::cout << std::format("or {:02X}, {:02X}, {:02X}", register_d, register_s,
+                           register_t)
+            << '\n';
 }
 
 cpu::Instruction::PrimaryOpcode cpu::Instruction::GetPrimaryOpcode() const {

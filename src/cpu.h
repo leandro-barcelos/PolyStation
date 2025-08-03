@@ -23,7 +23,7 @@ class Instruction {
     kNOP = 0xFF
   };
 
-  enum class SecondaryOpcode : uint8_t { kSLL = 0x00 };
+  enum class SecondaryOpcode : uint8_t { kSLL = 0x00, kOR = 0x25 };
 
   [[nodiscard]] PrimaryOpcode GetPrimaryOpcode() const;
   [[nodiscard]] SecondaryOpcode GetSecondaryOpcode() const;
@@ -59,6 +59,7 @@ class CPU {
   void OpSLL(const Instruction& instruction);
   void OpADDIU(const Instruction& instruction);
   void OpJ(const Instruction& instruction);
+  void OpOR(const Instruction& instruction);
 };
 }  // namespace cpu
 
