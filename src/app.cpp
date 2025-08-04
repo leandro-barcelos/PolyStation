@@ -165,7 +165,8 @@ void app::Application::MainLoop() {
       try {
         cpu_.Cycle();
       } catch (const std::exception& e) {
-        error_message_ = std::format("CPU Exception: {}", e.what());
+        std::snprintf(error_message_.data(), error_message_.size(), "%s",
+                      std::format("CPU Exception: {}", e.what()).c_str());
         show_error_popup_ = true;
       }
     }
