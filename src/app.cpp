@@ -399,8 +399,10 @@ void app::Application::DrawCPUStateWindow() {
 
 void app::Application::DrawControlWindow() {
   if (ImGui::Begin("PolyStation - Controls")) {
+    float const available_width = ImGui::GetContentRegionAvail().x;
+
     if (const auto* control_btn_label = !running_ ? "Run" : "Pause";
-        ImGui::Button(control_btn_label)) {
+        ImGui::Button(control_btn_label, ImVec2(available_width, 0.0))) {
       running_ = !running_;
     }
 
@@ -408,11 +410,11 @@ void app::Application::DrawControlWindow() {
 
     ImGui::Separator();
 
-    if (ImGui::Button("Step one") && !running_) {
+    if (ImGui::Button("Step one", ImVec2(available_width, 0.0)) && !running_) {
       cpu_.Cycle();
     }
 
-    if (ImGui::Button("Reset") && !running_) {
+    if (ImGui::Button("Reset", ImVec2(available_width, 0.0)) && !running_) {
       cpu_.Reset();
     }
   }
