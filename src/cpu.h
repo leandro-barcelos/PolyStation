@@ -19,14 +19,19 @@ class Instruction {
     kADDIU = 0x09,
     kORI = 0x0D,
     kLUI = 0x0F,
+    kCOP0 = 0x10,
     kSW = 0x2B,
     kNOP = 0xFF
   };
 
   enum class SecondaryOpcode : uint8_t { kSLL = 0x00, kOR = 0x25 };
 
+  enum class CoprocessorOpcode : uint8_t {};
+
   [[nodiscard]] PrimaryOpcode GetPrimaryOpcode() const;
   [[nodiscard]] SecondaryOpcode GetSecondaryOpcode() const;
+  [[nodiscard]] CoprocessorOpcode GetCoprocessorOpcode(bool flag) const;
+  [[nodiscard]] bool GetCoprocessorFlag() const;
   [[nodiscard]] uint8_t GetRegisterS() const;
   [[nodiscard]] uint8_t GetRegisterT() const;
   [[nodiscard]] uint8_t GetRegisterD() const;
