@@ -15,6 +15,9 @@ std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
   if (address >= kBiosBase && address < kBiosBase + kBiosSize) {
     return MemoryRegion::kBios;
   }
+  if (address == kCacheControlBase) {
+    return MemoryRegion::kCacheControl;
+  }
   return std::nullopt;
 }
 
@@ -77,6 +80,9 @@ void bus::Bus::Store(uint32_t address, uint32_t value) {
       break;
     case MemoryRegion::kRamSize:
       std::cout << "unhandled write to RAM_SIZE" << '\n';
+      break;
+    case MemoryRegion::kCacheControl:
+      std::cout << "unhandled write to Cache Control register" << '\n';
       break;
     default:
       throw std::runtime_error(
