@@ -434,9 +434,7 @@ void app::Application::DrawErrorPopup() {
   ImGui::SetNextWindowPos(center, ImGuiCond_Once, ImVec2(0.5F, 0.5F));
   ImGui::SetNextWindowSize(ImVec2(400, 0), ImGuiCond_Once);
 
-  if (ImGui::BeginPopupModal(
-          "CPU Error", nullptr,
-          ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
+  if (ImGui::BeginPopupModal("CPU Error", nullptr, ImGuiWindowFlags_NoResize)) {
     // Error icon and text
     ImGui::TextColored(ImVec4(1.0F, 0.3F, 0.3F, 1.0F), "⚠");
     ImGui::SameLine();
