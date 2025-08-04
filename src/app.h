@@ -78,10 +78,10 @@ class Application {
   void HandleEvents();
   void RenderFrame();
   void PresentFrame();
-  void DrawCPUStateWindow();
+  void DrawCPUStateWindow() const;
   void DrawControlWindow();
   void DrawErrorPopup();
-  void DrawMainViewWindow();
+  static void DrawMainViewWindow();
   static void SetupDockingLayout();
 
   [[nodiscard]] std::vector<const char*> GetRequiredExtensions() const;

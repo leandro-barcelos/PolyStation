@@ -1,4 +1,5 @@
 #include <iostream>
+#include <span>
 
 #include "app.h"
 
@@ -7,12 +8,13 @@
 #endif
 
 int main(const int argc, char** argv) {
-  if (argc <= 1) {
-    std::cerr << "Usage: " << argv[0] << " <bios_path>" << '\n';
+  const std::span args(argv, argc);
+  if (args.size() <= 1) {
+    std::cerr << "Usage: " << args[0] << " <bios_path>" << '\n';
   }
 
   try {
-    std::string const bios_path = argv[1];
+    std::string const bios_path = args[1];
     app::Application app{bios_path};
     app.Run();
   } catch (const std::exception& e) {

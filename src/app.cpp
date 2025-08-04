@@ -324,7 +324,7 @@ void app::Application::PresentFrame() {
       (main_window_data_.SemaphoreIndex + 1) % main_window_data_.SemaphoreCount;
 }
 
-void app::Application::DrawCPUStateWindow() {
+void app::Application::DrawCPUStateWindow() const {
   if (ImGui::Begin("PolyStation - CPU State")) {
     // Cycle Count
     ImGui::Text("Step Count: %llu", cpu_.GetStepCount());
@@ -339,13 +339,6 @@ void app::Application::DrawCPUStateWindow() {
     ImGui::TextUnformatted("Registers");
     ImGui::Separator();
     // Register names for MIPS/PlayStation CPU
-    constexpr std::array kRegisterNames{
-        "R0 (zero)", "R1 (at)",  "R2 (v0)",  "R3 (v1)",  "R4 (a0)",  "R5 (a1)",
-        "R6 (a2)",   "R7 (a3)",  "R8 (t0)",  "R9 (t1)",  "R10 (t2)", "R11 (t3)",
-        "R12 (t4)",  "R13 (t5)", "R14 (t6)", "R15 (t7)", "R16 (s0)", "R17 (s1)",
-        "R18 (s2)",  "R19 (s3)", "R20 (s4)", "R21 (s5)", "R22 (s6)", "R23 (s7)",
-        "R24 (t8)",  "R25 (t9)", "R26 (k0)", "R27 (k1)", "R28 (gp)", "R29 (sp)",
-        "R30 (fp)",  "R31 (ra)"};
     // Create table for registers in 8x4 grid
     if (ImGui::BeginTable("RegisterTable", 12,
                           ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
@@ -363,6 +356,14 @@ void app::Application::DrawCPUStateWindow() {
       for (int row = 0; row < 8; row++) {
         ImGui::TableNextRow();
         for (int col = 0; col < 4; col++) {
+          constexpr std::array kRegisterNames{
+              "R0 (zero)", "R1 (at)",  "R2 (v0)",  "R3 (v1)",  "R4 (a0)",
+              "R5 (a1)",   "R6 (a2)",  "R7 (a3)",  "R8 (t0)",  "R9 (t1)",
+              "R10 (t2)",  "R11 (t3)", "R12 (t4)", "R13 (t5)", "R14 (t6)",
+              "R15 (t7)",  "R16 (s0)", "R17 (s1)", "R18 (s2)", "R19 (s3)",
+              "R20 (s4)",  "R21 (s5)", "R22 (s6)", "R23 (s7)", "R24 (t8)",
+              "R25 (t9)",  "R26 (k0)", "R27 (k1)", "R28 (gp)", "R29 (sp)",
+              "R30 (fp)",  "R31 (ra)"};
           int const reg_index = (row * 4) + col;
           // Register name
           ImGui::TableNextColumn();
@@ -442,7 +443,7 @@ void app::Application::DrawErrorPopup() {
     ImGui::TextUnformatted("An error occurred in the CPU emulation:");
     ImGui::Separator();
     // Error message in a text box (selectable for copying)
-    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2F, 0.2F, 0.2F, 1.0F));
     ImGui::InputTextMultiline("##error_text", error_message_.data(),
                               error_message_.size(), ImVec2(-1, 80),
                               ImGuiInputTextFlags_ReadOnly);
@@ -786,10 +787,10 @@ bool app::Application::IsExtensionAvailable(
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL app::Application::DebugCallback(
-    VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
-    VkDebugUtilsMessageTypeFlagsEXT message_type,
+    [[maybe_unused]] VkDebugUtilsMessageSeverityFlagBitsEXT message_severity,
+    [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT message_type,
     const VkDebugUtilsMessengerCallbackDataEXT* p_callback_data,
-    void* p_user_data) {
+    [[maybe_unused]] void* p_user_data) {
   std::cerr << "validation layer: " << p_callback_data->pMessage << '\n';
   return VK_FALSE;
 }
