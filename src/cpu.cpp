@@ -4,6 +4,13 @@
 #include <gsl/gsl>
 #include <iostream>
 
+void cpu::CPU::Reset() {
+  program_counter_ = bus::kBiosBase;
+  next_instruction_ = Instruction(0x0);
+  registers_.fill(0);
+  step_count_ = 0;
+}
+
 void cpu::CPU::Cycle() {
   const Instruction instruction = next_instruction_;
   next_instruction_ = Instruction(Load(program_counter_));
@@ -44,7 +51,21 @@ void cpu::CPU::Cycle() {
           std::format("unhandled primary opcode {:02X}",
                       static_cast<uint8_t>(instruction.GetPrimaryOpcode())));
   }
+
+  step_count_++;
 }
+
+uint32_t cpu::CPU::GetRegister(const uint32_t index) const {
+  return gsl::at(registers_, index);
+}
+
+void cpu::CPU::SetRegister(const uint32_t index, const uint32_t value) {
+  gsl::at(registers_, index) = value;
+}
+
+unsigned long long cpu::CPU::GetStepCount() const { return step_count_; }
+
+uint32_t cpu::CPU::GetPC() const { return program_counter_; }
 
 uint32_t cpu::CPU::Load(const uint32_t address) const {
   return bus_.Load(address);

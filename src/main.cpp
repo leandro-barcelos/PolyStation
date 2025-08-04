@@ -1,18 +1,24 @@
 #include <iostream>
 
-#include "cpu.h"
+#include "app.h"
 
-int main(int argc, char* argv[]) {
+#ifdef _WIN32
+#include <windows.h>  // SetProcessDPIAware()
+#endif
+
+int main(const int argc, char** argv) {
   if (argc <= 1) {
-    std::cout << "no bios file was provided!";
-    return EXIT_FAILURE;
+    std::cerr << "Usage: " << argv[0] << " <bios_path>" << '\n';
   }
 
-  const std::string path = argv[1];
-
-  cpu::CPU cpu{path};
-
-  while (true) {
-    cpu.Cycle();
+  try {
+    std::string const bios_path = argv[1];
+    app::Application app{bios_path};
+    app.Run();
+  } catch (const std::exception& e) {
+    std::cerr << "Application error: " << e.what() << '\n';
+    return -1;
   }
+
+  return 0;
 }

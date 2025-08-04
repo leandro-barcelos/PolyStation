@@ -42,7 +42,9 @@ target_compile_definitions(imgui PUBLIC
 add_executable(PolyStation src/main.cpp
         src/bios.cpp
         src/bus.cpp
-        src/cpu.cpp)
+        src/cpu.cpp
+        src/app.cpp
+        src/app.h)
 
 target_link_libraries(PolyStation PRIVATE
         Microsoft.GSL::GSL

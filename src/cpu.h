@@ -42,13 +42,19 @@ class CPU {
  public:
   explicit CPU(const std::string& path) : bus_(path) { registers_[0] = 0; }
 
+  void Reset();
   void Cycle();
+  [[nodiscard]] uint32_t GetRegister(uint32_t index) const;
+  void SetRegister(uint32_t index, uint32_t value);
+  [[nodiscard]] unsigned long long GetStepCount() const;
+  [[nodiscard]] uint32_t GetPC() const;
 
  private:
   uint32_t program_counter_ = bus::kBiosBase;
   Instruction next_instruction_{0x0};
   std::array<uint32_t, kNumberOfRegisters> registers_{};
   bus::Bus bus_;
+  unsigned long long step_count_ = 0;
 
   [[nodiscard]] uint32_t Load(uint32_t address) const;
   static void Store(uint32_t address, uint32_t value);
