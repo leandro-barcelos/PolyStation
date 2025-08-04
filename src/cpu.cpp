@@ -85,83 +85,59 @@ void cpu::CPU::Store(const uint32_t address, const uint32_t value) {
 }
 
 void cpu::CPU::OpORI(const Instruction& instruction) {
-  uint8_t register_s = instruction.GetRegisterS();
-  uint8_t register_t = instruction.GetRegisterT();
-  uint16_t immediate = instruction.GetImmediate16();
+  const uint8_t register_s = instruction.GetRegisterS();
+  const uint8_t register_t = instruction.GetRegisterT();
+  const uint16_t immediate = instruction.GetImmediate16();
 
   gsl::at(registers_, register_t) = gsl::at(registers_, register_s) | immediate;
-
-  std::cout << std::format("ori {:02X}, {:02X}, {:04X}", register_t, register_s,
-                           immediate)
-            << '\n';
 }
 
 void cpu::CPU::OpLUI(const Instruction& instruction) {
-  uint8_t register_t = instruction.GetRegisterT();
-  uint16_t immediate = instruction.GetImmediate16();
+  const uint8_t register_t = instruction.GetRegisterT();
+  const uint16_t immediate = instruction.GetImmediate16();
 
   gsl::at(registers_, register_t) = immediate << 16U;
-
-  std::cout << std::format("lui {:02X}, {:04X}", register_t, immediate) << '\n';
 }
 
 void cpu::CPU::OpSW(const Instruction& instruction) {
-  uint8_t register_s = instruction.GetRegisterS();
-  uint8_t register_t = instruction.GetRegisterT();
-  uint32_t immediate = instruction.GetImmediate16SignExtend();
+  const uint8_t register_s = instruction.GetRegisterS();
+  const uint8_t register_t = instruction.GetRegisterT();
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   const uint32_t address = gsl::at(registers_, register_s) + immediate;
   Store(address, gsl::at(registers_, register_t));
-
-  std::cout << std::format("sw {:02X}, {:04X}({:02X})", register_t, immediate,
-                           register_s)
-            << '\n';
 }
 
 void cpu::CPU::OpSLL(const Instruction& instruction) {
-  uint8_t register_t = instruction.GetRegisterT();
-  uint32_t register_d = instruction.GetRegisterD();
-  uint16_t immediate = instruction.GetImmediate16();
+  const uint8_t register_t = instruction.GetRegisterT();
+  const uint32_t register_d = instruction.GetRegisterD();
+  const uint16_t immediate = instruction.GetImmediate16();
 
   gsl::at(registers_, register_d) = gsl::at(registers_, register_t)
                                     << immediate;
-
-  std::cout << std::format("sll {:02X}, {:02X}, {:04X}", register_d, register_t,
-                           immediate)
-            << '\n';
 }
 
 void cpu::CPU::OpADDIU(const Instruction& instruction) {
-  uint8_t register_t = instruction.GetRegisterT();
-  uint8_t register_s = instruction.GetRegisterS();
-  uint16_t immediate = instruction.GetImmediate16();
+  const uint8_t register_t = instruction.GetRegisterT();
+  const uint8_t register_s = instruction.GetRegisterS();
+  const uint16_t immediate = instruction.GetImmediate16();
 
   gsl::at(registers_, register_t) = gsl::at(registers_, register_s) + immediate;
-
-  std::cout << std::format("addiu {:02X}, {:02X}, {:04X}", register_t,
-                           register_s, immediate)
-            << '\n';
 }
 
 void cpu::CPU::OpJ(const Instruction& instruction) {
-  uint32_t immediate = instruction.GetImmediate26();
+  const uint32_t immediate = instruction.GetImmediate26();
 
   program_counter_ = (program_counter_ & 0xF0000000) | (immediate << 2U);
-
-  std::cout << std::format("j {:07X}", immediate) << '\n';
 }
 
 void cpu::CPU::OpOR(const Instruction& instruction) {
-  uint8_t register_s = instruction.GetRegisterS();
-  uint8_t register_t = instruction.GetRegisterT();
-  uint8_t register_d = instruction.GetRegisterD();
+  const uint8_t register_s = instruction.GetRegisterS();
+  const uint8_t register_t = instruction.GetRegisterT();
+  const uint8_t register_d = instruction.GetRegisterD();
 
   gsl::at(registers_, register_d) =
       gsl::at(registers_, register_s) | gsl::at(registers_, register_t);
-
-  std::cout << std::format("or {:02X}, {:02X}, {:02X}", register_d, register_s,
-                           register_t)
-            << '\n';
 }
 
 cpu::Instruction::PrimaryOpcode cpu::Instruction::GetPrimaryOpcode() const {
@@ -198,3 +174,55 @@ uint32_t cpu::Instruction::GetImmediate16SignExtend() const {
 }
 
 uint32_t cpu::Instruction::GetImmediate26() const { return data_ & 0x3FFFFFFU; }
+
+std::ostream& cpu::operator<<(std::ostream& outs,
+                              const Instruction& instruction) {
+  switch (instruction.GetPrimaryOpcode()) {
+    case Instruction::PrimaryOpcode::kSPECIAL:
+      switch (instruction.GetSecondaryOpcode()) {
+        case Instruction::SecondaryOpcode::kSLL:
+          return outs << std::format(
+                     "sll R{}, R{}, {:04X}", instruction.GetRegisterD(),
+                     instruction.GetRegisterT(), instruction.GetImmediate16());
+        case Instruction::SecondaryOpcode::kOR:
+          return outs << std::format(
+                     "or R{}, R{}, R{}", instruction.GetRegisterD(),
+                     instruction.GetRegisterS(), instruction.GetRegisterT());
+        default:
+          return outs << "";
+      }
+    case Instruction::PrimaryOpcode::kJ:
+      return outs << std::format("j {:07X}", instruction.GetImmediate26());
+    case Instruction::PrimaryOpcode::kADDIU:
+      return outs << std::format(
+                 "addiu R{}, R{}, {:04X}", instruction.GetRegisterT(),
+                 instruction.GetRegisterS(), instruction.GetImmediate16());
+    case Instruction::PrimaryOpcode::kORI:
+      return outs << std::format(
+                 "ori R{}, R{}, {:04X}", instruction.GetRegisterT(),
+                 instruction.GetRegisterS(), instruction.GetImmediate16());
+    case Instruction::PrimaryOpcode::kLUI:
+      return outs << std::format("lui R{}, {:04X}", instruction.GetRegisterT(),
+                                 instruction.GetImmediate16());
+    case Instruction::PrimaryOpcode::kCOP0:
+      switch (const bool flag = instruction.GetCoprocessorFlag();
+              instruction.GetCoprocessorOpcode(flag)) {
+        default:
+          return outs << "";
+      }
+    case Instruction::PrimaryOpcode::kSW:
+      return outs << std::format("sw R{}, {:04X}(R{})",
+                                 instruction.GetRegisterT(),
+                                 instruction.GetImmediate16SignExtend(),
+                                 instruction.GetRegisterS());
+    default:
+      return outs << "";
+  }
+}
+
+template <typename T>
+std::string cpu::Instruction::ToString(const T& value) {
+  std::ostringstream string_stream;
+  string_stream << value;
+  return string_stream.str();
+}

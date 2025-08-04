@@ -13,6 +13,12 @@ class Instruction {
  public:
   explicit Instruction(const uint32_t instruction) : data_(instruction) {}
 
+  friend std::ostream& operator<<(std::ostream& outs,
+                                  const Instruction& instruction);
+
+  template <typename T>
+  static std::string ToString(const T& value);
+
   enum class PrimaryOpcode : uint8_t {
     kSPECIAL = 0x00,
     kJ = 0x02,
