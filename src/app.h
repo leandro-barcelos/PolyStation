@@ -39,6 +39,7 @@ class Application {
 
  private:
   cpu::CPU cpu_;
+  bool running_ = true;
 
   bool done_ = false;
   SDL_Window* window_ = nullptr;
@@ -57,7 +58,6 @@ class Application {
   bool swap_chain_rebuild_ = false;
 
   // Error window
-  bool halt_ = false;
   bool show_error_popup_ = false;
   std::string error_message_;
 
@@ -79,7 +79,9 @@ class Application {
   void RenderFrame();
   void PresentFrame();
   void DrawCPUStateWindow();
+  void DrawControlWindow();
   void DrawErrorPopup();
+  static void SetupDockingLayout();
 
   [[nodiscard]] std::vector<const char*> GetRequiredExtensions() const;
   static bool IsExtensionAvailable(

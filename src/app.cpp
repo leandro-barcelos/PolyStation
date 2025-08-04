@@ -105,6 +105,7 @@ void app::Application::InitImGui() const {
       ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
   im_gui_io.ConfigFlags |=
       ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+  im_gui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
@@ -160,7 +161,7 @@ void app::Application::MainLoop() {
     }
 
     // Emulator
-    if (!halt_) {
+    if (running_) {
       try {
         cpu_.Cycle();
       } catch (const std::exception& e) {
@@ -201,7 +202,10 @@ void app::Application::RenderFrame() {
   ImGui_ImplSDL2_NewFrame();
   ImGui::NewFrame();
 
+  SetupDockingLayout();
+
   DrawCPUStateWindow();
+  DrawControlWindow();
   DrawErrorPopup();
 
   // Rendering
@@ -392,10 +396,32 @@ void app::Application::DrawCPUStateWindow() {
   ImGui::End();
 }
 
+void app::Application::DrawControlWindow() {
+  if (ImGui::Begin("PolyStation - Controls")) {
+    if (const auto* control_btn_label = !running_ ? "Run" : "Pause";
+        ImGui::Button(control_btn_label)) {
+      running_ = !running_;
+    }
+
+    ImGui::Text("Status: %s", running_ ? "Running" : "Paused");
+
+    ImGui::Separator();
+
+    if (ImGui::Button("Step one") && !running_) {
+      cpu_.Cycle();
+    }
+
+    if (ImGui::Button("Reset") && !running_) {
+      cpu_.Reset();
+    }
+  }
+  ImGui::End();
+}
+
 void app::Application::DrawErrorPopup() {
   if (show_error_popup_) {
     ImGui::OpenPopup("CPU Error");
-    halt_ = true;
+    running_ = false;
     show_error_popup_ = false;
   }
 
@@ -427,20 +453,67 @@ void app::Application::DrawErrorPopup() {
     ImGui::SetCursorPosX(start_x);
     ImGui::SameLine(0, kButtonSpacing);
     if (ImGui::Button("Reset CPU", ImVec2(kButtonWidth, 0))) {
-      halt_ = false;
       cpu_.Reset();
       ImGui::CloseCurrentPopup();
     }
 
     ImGui::SameLine(0, kButtonSpacing);
     if (ImGui::Button("Exit", ImVec2(kButtonWidth, 0))) {
-      halt_ = false;
       ImGui::CloseCurrentPopup();
-      done_ = true;
     }
 
     ImGui::EndPopup();
   }
+}
+
+void app::Application::SetupDockingLayout() {
+  const ImGuiViewport* viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->WorkPos);
+  ImGui::SetNextWindowSize(viewport->WorkSize);
+  ImGui::SetNextWindowViewport(viewport->ID);
+  ImGuiWindowFlags window_flags =
+      ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+  window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse;
+  window_flags |= ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+  window_flags |=
+      ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0F);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0F);
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0F, 0.0F));
+  ImGui::Begin("DockSpaceWindow", nullptr, window_flags);
+  ImGui::PopStyleVar(3);
+
+  if (ImGuiIO const& im_gui_io = ImGui::GetIO();
+      im_gui_io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+    ImGuiID const dockspace_id = ImGui::GetID("MainDockSpace");
+    ImGui::DockSpace(dockspace_id, ImVec2(0.0F, 0.0F), ImGuiDockNodeFlags_None);
+
+    static bool first_time = true;
+    if (first_time) {
+      first_time = false;
+      ImGui::DockBuilderRemoveNode(dockspace_id);
+      ImGui::DockBuilderAddNode(dockspace_id, ImGuiDockNodeFlags_DockSpace);
+      ImGui::DockBuilderSetNodeSize(dockspace_id, viewport->Size);
+
+      ImGuiID dock_top = 0;
+      ImGuiID dock_bottom = 0;
+      ImGui::DockBuilderSplitNode(dockspace_id, ImGuiDir_Up, 0.60F, &dock_top,
+                                  &dock_bottom);
+
+      ImGuiID dock_top_left = 0;
+      ImGuiID dock_top_right = 0;
+      ImGui::DockBuilderSplitNode(dock_top, ImGuiDir_Left, 0.25F,
+                                  &dock_top_left, &dock_top_right);
+
+      ImGui::DockBuilderDockWindow("PolyStation - Controls", dock_top_left);
+      ImGui::DockBuilderDockWindow("PolyStation - CPU State", dock_bottom);
+
+      ImGui::DockBuilderFinish(dockspace_id);
+    }
+  }
+
+  ImGui::End();
 }
 
 void app::Application::Cleanup() {
