@@ -59,7 +59,7 @@ class Application {
 
   // Error window
   bool show_error_popup_ = false;
-  std::array<char, 1024> error_message_;
+  std::array<char, 1024> error_message_{};
 
   void InitSDL();
   void InitVulkan();
