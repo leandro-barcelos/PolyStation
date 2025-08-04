@@ -81,6 +81,7 @@ class Application {
   void DrawCPUStateWindow();
   void DrawControlWindow();
   void DrawErrorPopup();
+  void DrawMainViewWindow();
   static void SetupDockingLayout();
 
   [[nodiscard]] std::vector<const char*> GetRequiredExtensions() const;

@@ -206,6 +206,7 @@ void app::Application::RenderFrame() {
 
   DrawCPUStateWindow();
   DrawControlWindow();
+  DrawMainViewWindow();
   DrawErrorPopup();
 
   // Rendering
@@ -466,6 +467,12 @@ void app::Application::DrawErrorPopup() {
   }
 }
 
+void app::Application::DrawMainViewWindow() {
+  if (ImGui::Begin("PolyStation - Display")) {
+  }
+  ImGui::End();
+}
+
 void app::Application::SetupDockingLayout() {
   const ImGuiViewport* viewport = ImGui::GetMainViewport();
   ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -503,11 +510,12 @@ void app::Application::SetupDockingLayout() {
 
       ImGuiID dock_top_left = 0;
       ImGuiID dock_top_right = 0;
-      ImGui::DockBuilderSplitNode(dock_top, ImGuiDir_Left, 0.25F,
+      ImGui::DockBuilderSplitNode(dock_top, ImGuiDir_Left, 0.15F,
                                   &dock_top_left, &dock_top_right);
 
       ImGui::DockBuilderDockWindow("PolyStation - Controls", dock_top_left);
       ImGui::DockBuilderDockWindow("PolyStation - CPU State", dock_bottom);
+      ImGui::DockBuilderDockWindow("PolyStation - Display", dock_top_right);
 
       ImGui::DockBuilderFinish(dockspace_id);
     }
