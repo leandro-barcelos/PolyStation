@@ -415,7 +415,13 @@ void app::Application::DrawControlWindow() {
     ImGui::Separator();
 
     if (ImGui::Button("Step one", ImVec2(available_width, 0.0)) && !running_) {
-      cpu_.Cycle();
+      try {
+        cpu_.Cycle();
+      } catch (const std::exception& e) {
+        std::snprintf(error_message_.data(), error_message_.size(), "%s",
+                      std::format("CPU Exception: {}", e.what()).c_str());
+        show_error_popup_ = true;
+      }
     }
 
     if (ImGui::Button("Reset", ImVec2(available_width, 0.0)) && !running_) {
