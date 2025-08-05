@@ -1,5 +1,6 @@
 #include "app.h"
 
+#include <deque>
 #include <format>
 #include <gsl/gsl>
 #include <iostream>
@@ -207,6 +208,7 @@ void app::Application::RenderFrame() {
 
   DrawCPUStateWindow();
   DrawControlWindow();
+  DrawCpuDisassembler();
   DrawMainViewWindow();
   DrawErrorPopup();
 
@@ -423,6 +425,64 @@ void app::Application::DrawControlWindow() {
   ImGui::End();
 }
 
+void app::Application::DrawCpuDisassembler() const {
+  constexpr uint32_t kMaxInstructions = 25;
+
+  const uint32_t current_pc = cpu_.GetPC() - 4;
+
+  ImGui::Begin("PolyStation - CPU Disassembler");
+
+  uint32_t start_pc = current_pc;
+  if (constexpr uint32_t kInstructionsBefore = 5;
+      current_pc >= bus::kBiosBase + (kInstructionsBefore * 4)) {
+    start_pc = current_pc - (kInstructionsBefore * 4);
+  } else {
+    start_pc = bus::kBiosBase;
+  }
+
+  start_pc = (start_pc / 4) * 4;
+
+  for (uint32_t pc = start_pc; pc < start_pc + (kMaxInstructions * 4);
+       pc += 4) {
+    if (pc < bus::kBiosBase || pc >= bus::kBiosBase + bus::kBiosSize) {
+      continue;
+    }
+
+    const uint32_t instruction_data = cpu_.Load(pc);
+    const cpu::Instruction instruction(instruction_data);
+
+    if (pc == current_pc) {
+      ImDrawList* draw_list = ImGui::GetWindowDrawList();
+      const ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
+      const float line_height = ImGui::GetTextLineHeight();
+      const std::string full_text =
+          std::format("0x{:08X}  {}", pc, instruction.ToString());
+      const ImVec2 text_size = ImGui::CalcTextSize(full_text.c_str());
+      const auto rect_min = ImVec2(cursor_pos.x - 2.0f, cursor_pos.y);
+      const auto rect_max = ImVec2(cursor_pos.x + text_size.x + 15.0f,
+                                   cursor_pos.y + line_height);
+      const ImU32 bg_color = ImGui::GetColorU32(ImVec4(0.2f, 0.4f, 0.8f, 0.4f));
+      draw_list->AddRectFilled(rect_min, rect_max, bg_color);
+    }
+
+    ImGui::Text("0x%08X", pc);
+    ImGui::SameLine();
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    const ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
+    const float line_height = ImGui::GetTextLineHeight();
+    const auto line_start = ImVec2(cursor_pos.x, cursor_pos.y);
+    const auto line_end = ImVec2(cursor_pos.x, cursor_pos.y + line_height);
+    const ImU32 separator_color = ImGui::GetColorU32(ImGuiCol_Separator);
+    draw_list->AddLine(line_start, line_end, separator_color, 1.0f);
+    ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 10.0f);
+    ImGui::SameLine();
+
+    ImGui::Text("%s", instruction.ToString().c_str());
+  }
+  ImGui::End();
+}
+
 void app::Application::DrawErrorPopup() {
   if (show_error_popup_) {
     ImGui::OpenPopup("CPU Error");
@@ -515,9 +575,15 @@ void app::Application::SetupDockingLayout() {
       ImGui::DockBuilderSplitNode(dock_top, ImGuiDir_Left, 0.15F,
                                   &dock_top_left, &dock_top_right);
 
+      ImGuiID dock_top_center = 0;
+      ImGui::DockBuilderSplitNode(dock_top_right, ImGuiDir_Right, 0.23F,
+                                  &dock_top_right, &dock_top_center);
+
       ImGui::DockBuilderDockWindow("PolyStation - Controls", dock_top_left);
       ImGui::DockBuilderDockWindow("PolyStation - CPU State", dock_bottom);
-      ImGui::DockBuilderDockWindow("PolyStation - Display", dock_top_right);
+      ImGui::DockBuilderDockWindow("PolyStation - Display", dock_top_center);
+      ImGui::DockBuilderDockWindow("PolyStation - CPU Disassembler",
+                                   dock_top_right);
 
       ImGui::DockBuilderFinish(dockspace_id);
     }

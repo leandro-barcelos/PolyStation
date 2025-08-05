@@ -80,6 +80,7 @@ class Application {
   void PresentFrame();
   void DrawCPUStateWindow() const;
   void DrawControlWindow();
+  void DrawCpuDisassembler() const;
   void DrawErrorPopup();
   static void DrawMainViewWindow();
   static void SetupDockingLayout();
