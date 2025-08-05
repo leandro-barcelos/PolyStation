@@ -46,6 +46,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kCOP0: {
       switch (const bool flag = instruction.GetCoprocessorFlag();
               instruction.GetCoprocessorOpcode(flag)) {
+        case Instruction::CoprocessorOpcode::kMTC:
+          OpMTC(instruction);
+          break;
         default:
           throw std::runtime_error(std::format(
               "unhandled coprocessor opcode {:02X}",
@@ -141,6 +144,26 @@ void cpu::CPU::OpOR(const Instruction& instruction) {
       gsl::at(registers_, register_s) | gsl::at(registers_, register_t);
 }
 
+void cpu::CPU::OpMTC(const Instruction& instruction) {
+  switch (instruction.GetCoprocessor()) {
+    case 0: {
+      const uint8_t register_t = instruction.GetRegisterT();
+      switch (uint8_t register_d = instruction.GetRegisterD()) {
+        case COP0::Registers::kStatusRegister:
+          cop0_.status_register = register_t;
+          break;
+        default:
+          throw std::runtime_error(
+              std::format("unhandled cop0 register {}", register_d));
+      }
+      break;
+    }
+    default:
+      throw std::runtime_error(std::format("unhandled coprocessor COP{}",
+                                           instruction.GetCoprocessor()));
+  }
+}
+
 cpu::Instruction::PrimaryOpcode cpu::Instruction::GetPrimaryOpcode() const {
   return static_cast<PrimaryOpcode>(data_ >> 26U & 0x3FU);
 }
@@ -156,6 +179,8 @@ cpu::Instruction::CoprocessorOpcode cpu::Instruction::GetCoprocessorOpcode(
 
   return static_cast<CoprocessorOpcode>(data_ >> 21U & 0x1FU);
 }
+
+uint8_t cpu::Instruction::GetCoprocessor() const { return data_ >> 26U & 0x3U; }
 
 bool cpu::Instruction::GetCoprocessorFlag() const {
   return (data_ >> 25U & 0x1U) == 1;
@@ -208,6 +233,11 @@ std::ostream& cpu::operator<<(std::ostream& outs,
     case Instruction::PrimaryOpcode::kCOP0:
       switch (const bool flag = instruction.GetCoprocessorFlag();
               instruction.GetCoprocessorOpcode(flag)) {
+        case Instruction::CoprocessorOpcode::kMTC:
+          return outs << std::format(
+                     "mtc{} R{}, cop{}dat{}", instruction.GetCoprocessor(),
+                     instruction.GetRegisterT(), instruction.GetCoprocessor(),
+                     instruction.GetRegisterD());
         default:
           return outs << std::format("0x{:08X}", instruction.GetRawData());
       }

@@ -29,12 +29,13 @@ class Instruction {
 
   enum class SecondaryOpcode : uint8_t { kSLL = 0x00, kOR = 0x25 };
 
-  enum class CoprocessorOpcode : uint8_t {};
+  enum class CoprocessorOpcode : uint8_t { kMTC = 0x04 };
 
   [[nodiscard]] uint32_t GetRawData() const { return data_; }
   [[nodiscard]] PrimaryOpcode GetPrimaryOpcode() const;
   [[nodiscard]] SecondaryOpcode GetSecondaryOpcode() const;
   [[nodiscard]] CoprocessorOpcode GetCoprocessorOpcode(bool flag) const;
+  [[nodiscard]] uint8_t GetCoprocessor() const;
   [[nodiscard]] bool GetCoprocessorFlag() const;
   [[nodiscard]] uint8_t GetRegisterS() const;
   [[nodiscard]] uint8_t GetRegisterT() const;
@@ -45,6 +46,12 @@ class Instruction {
 
  private:
   uint32_t data_;
+};
+
+struct COP0 {
+  uint32_t status_register = 0;
+
+  enum Registers : uint8_t { kStatusRegister = 0xC };
 };
 
 class CPU {
@@ -64,6 +71,7 @@ class CPU {
   Instruction next_instruction_{0x0};
   std::array<uint32_t, kNumberOfRegisters> registers_{};
   bus::Bus bus_;
+  COP0 cop0_;
   unsigned long long step_count_ = 0;
 
   static void Store(uint32_t address, uint32_t value);
@@ -75,6 +83,7 @@ class CPU {
   void OpADDIU(const Instruction& instruction);
   void OpJ(const Instruction& instruction);
   void OpOR(const Instruction& instruction);
+  void OpMTC(const Instruction& instruction);
 };
 
 std::ostream& operator<<(std::ostream& outs, const Instruction& instruction);
