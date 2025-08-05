@@ -152,7 +152,7 @@ void cpu::CPU::OpMTC(const Instruction& instruction) {
       const uint8_t register_t = instruction.GetRegisterT();
       switch (uint8_t register_d = instruction.GetRegisterD()) {
         case COP0::Registers::kStatusRegister:
-          cop0_.status_register = register_t;
+          cop0_.status_register = gsl::at(registers_, register_t);
           break;
         default:
           throw std::runtime_error(
