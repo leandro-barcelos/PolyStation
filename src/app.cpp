@@ -339,62 +339,133 @@ void app::Application::DrawCPUStateWindow() const {
     ImGui::SameLine(320);
     ImGui::Text("(%u)", cpu_.GetPC());
     ImGui::Separator();
-    ImGui::TextUnformatted("Registers");
+    // Register type selection
+    static int register_type = 0;  // 0 = CPU registers, 1 = COP0 registers
+    const char* register_types[] = {"CPU Registers", "COP0 Registers"};
+    ImGui::Text("Register Set:");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(150.0f);
+    ImGui::Combo("##RegisterType", &register_type, register_types,
+                 IM_ARRAYSIZE(register_types));
     ImGui::Separator();
-    // Register names for MIPS/PlayStation CPU
-    // Create table for registers in 8x4 grid
-    if (ImGui::BeginTable("RegisterTable", 12,
-                          ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
-      // Setup columns - 4 groups of (Name, Hex, Decimal)
-      for (int group = 0; group < 4; group++) {
-        ImGui::TableSetupColumn("Register", ImGuiTableColumnFlags_WidthFixed,
-                                80.0F);
-        ImGui::TableSetupColumn("Hex", ImGuiTableColumnFlags_WidthFixed, 90.0F);
-        ImGui::TableSetupColumn("Decimal", ImGuiTableColumnFlags_WidthFixed,
-                                100.0F);
-      }
-      // Header row
-      ImGui::TableHeadersRow();
-      // 8 rows of 4 registers each
-      for (int row = 0; row < 8; row++) {
-        ImGui::TableNextRow();
-        for (int col = 0; col < 4; col++) {
-          constexpr std::array kRegisterNames{
-              "R0 (zero)", "R1 (at)",  "R2 (v0)",  "R3 (v1)",  "R4 (a0)",
-              "R5 (a1)",   "R6 (a2)",  "R7 (a3)",  "R8 (t0)",  "R9 (t1)",
-              "R10 (t2)",  "R11 (t3)", "R12 (t4)", "R13 (t5)", "R14 (t6)",
-              "R15 (t7)",  "R16 (s0)", "R17 (s1)", "R18 (s2)", "R19 (s3)",
-              "R20 (s4)",  "R21 (s5)", "R22 (s6)", "R23 (s7)", "R24 (t8)",
-              "R25 (t9)",  "R26 (k0)", "R27 (k1)", "R28 (gp)", "R29 (sp)",
-              "R30 (fp)",  "R31 (ra)"};
-          int const reg_index = (row * 4) + col;
-          // Register name
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", gsl::at(kRegisterNames, reg_index));
-          // Hex value
-          ImGui::TableNextColumn();
-          if (reg_index == 0) {
-            // R0 is always zero in MIPS
-            ImGui::TextColored(ImVec4(0.5F, 0.5F, 0.5F, 1.0F), "0x00000000");
-          } else if (cpu_.GetRegister(reg_index) != 0) {
-            ImGui::TextColored(ImVec4(0.2F, 1.0F, 0.2F, 1.0F), "0x%08X",
-                               cpu_.GetRegister(reg_index));
-          } else {
-            ImGui::Text("0x%08X", cpu_.GetRegister(reg_index));
-          }
-          // Decimal value
-          ImGui::TableNextColumn();
-          if (reg_index == 0) {
-            ImGui::TextColored(ImVec4(0.5F, 0.5F, 0.5F, 1.0F), "0");
-          } else if (cpu_.GetRegister(reg_index) != 0) {
-            ImGui::TextColored(ImVec4(0.2F, 1.0F, 0.2F, 1.0F), "%u",
-                               cpu_.GetRegister(reg_index));
-          } else {
-            ImGui::Text("%u", cpu_.GetRegister(reg_index));
+    if (register_type == 0) {
+      // CPU Registers
+      ImGui::TextUnformatted("CPU Registers");
+      ImGui::Separator();
+      // Register names for MIPS/PlayStation CPU
+      // Create table for registers in 8x4 grid
+      if (ImGui::BeginTable("RegisterTable", 12,
+                            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+        // Setup columns - 4 groups of (Name, Hex, Decimal)
+        for (int group = 0; group < 4; group++) {
+          ImGui::TableSetupColumn("Register", ImGuiTableColumnFlags_WidthFixed,
+                                  80.0F);
+          ImGui::TableSetupColumn("Hex", ImGuiTableColumnFlags_WidthFixed,
+                                  90.0F);
+          ImGui::TableSetupColumn("Decimal", ImGuiTableColumnFlags_WidthFixed,
+                                  100.0F);
+        }
+        // Header row
+        ImGui::TableHeadersRow();
+        // 8 rows of 4 registers each
+        for (int row = 0; row < 8; row++) {
+          ImGui::TableNextRow();
+          for (int col = 0; col < 4; col++) {
+            constexpr std::array kRegisterNames{
+                "R0 (zero)", "R1 (at)",  "R2 (v0)",  "R3 (v1)",  "R4 (a0)",
+                "R5 (a1)",   "R6 (a2)",  "R7 (a3)",  "R8 (t0)",  "R9 (t1)",
+                "R10 (t2)",  "R11 (t3)", "R12 (t4)", "R13 (t5)", "R14 (t6)",
+                "R15 (t7)",  "R16 (s0)", "R17 (s1)", "R18 (s2)", "R19 (s3)",
+                "R20 (s4)",  "R21 (s5)", "R22 (s6)", "R23 (s7)", "R24 (t8)",
+                "R25 (t9)",  "R26 (k0)", "R27 (k1)", "R28 (gp)", "R29 (sp)",
+                "R30 (fp)",  "R31 (ra)"};
+            int const reg_index = (row * 4) + col;
+            // Register name
+            ImGui::TableNextColumn();
+            ImGui::Text("%s", gsl::at(kRegisterNames, reg_index));
+            // Hex value
+            ImGui::TableNextColumn();
+            if (reg_index == 0) {
+              // R0 is always zero in MIPS
+              ImGui::TextColored(ImVec4(0.5F, 0.5F, 0.5F, 1.0F), "0x00000000");
+            } else if (cpu_.GetRegister(reg_index) != 0) {
+              ImGui::TextColored(ImVec4(0.2F, 1.0F, 0.2F, 1.0F), "0x%08X",
+                                 cpu_.GetRegister(reg_index));
+            } else {
+              ImGui::Text("0x%08X", cpu_.GetRegister(reg_index));
+            }
+            // Decimal value
+            ImGui::TableNextColumn();
+            if (reg_index == 0) {
+              ImGui::TextColored(ImVec4(0.5F, 0.5F, 0.5F, 1.0F), "0");
+            } else if (cpu_.GetRegister(reg_index) != 0) {
+              ImGui::TextColored(ImVec4(0.2F, 1.0F, 0.2F, 1.0F), "%u",
+                                 cpu_.GetRegister(reg_index));
+            } else {
+              ImGui::Text("%u", cpu_.GetRegister(reg_index));
+            }
           }
         }
+        ImGui::EndTable();
       }
-      ImGui::EndTable();
+    } else {
+      // COP0 Registers
+      ImGui::TextUnformatted("COP0 Registers");
+      ImGui::Separator();
+      if (ImGui::BeginTable("COP0RegisterTable", 3,
+                            ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg)) {
+        // Setup columns
+        ImGui::TableSetupColumn("Register", ImGuiTableColumnFlags_WidthFixed,
+                                120.0F);
+        ImGui::TableSetupColumn("Hex", ImGuiTableColumnFlags_WidthFixed,
+                                100.0F);
+        ImGui::TableSetupColumn("Decimal", ImGuiTableColumnFlags_WidthFixed,
+                                100.0F);
+        // Header row
+        ImGui::TableHeadersRow();
+        // Status Register (Register 12)
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("R12 (Status)");
+        ImGui::TableNextColumn();
+        const uint32_t status_value = cpu_.GetCop0().status_register;
+        if (status_value != 0) {
+          ImGui::TextColored(ImVec4(0.2F, 1.0F, 0.2F, 1.0F), "0x%08X",
+                             status_value);
+        } else {
+          ImGui::Text("0x%08X", status_value);
+        }
+        ImGui::TableNextColumn();
+        if (status_value != 0) {
+          ImGui::TextColored(ImVec4(0.2F, 1.0F, 0.2F, 1.0F), "%u",
+                             status_value);
+        } else {
+          ImGui::Text("%u", status_value);
+        }
+        // // Add more COP0 registers here as they are implemented
+        // // For now, we'll show placeholders for common COP0 registers
+        // for (int i = 0; i < 16; i++) {
+        //   constexpr std::array kCop0RegisterNames = {
+        //       "R0 (Index)",    "R1 (Random)",   "R2 (EntryLo0)",
+        //       "R3 (EntryLo1)", "R4 (Context)",  "R5 (PageMask)",
+        //       "R6 (Wired)",    "R7 (Reserved)", "R8 (BadVAddr)",
+        //       "R9 (Count)",    "R10 (EntryHi)", "R11 (Compare)",
+        //       "R13 (Cause)",   "R14 (EPC)",     "R15 (PRId)"};
+        //
+        //   if (i == 12) {
+        //     continue;  // Skip status register as it's already shown
+        //   }
+        //
+        //   ImGui::TableNextRow();
+        //   ImGui::TableNextColumn();
+        //   ImGui::Text("%s", gsl::at(kCop0RegisterNames, i));
+        //   ImGui::TableNextColumn();
+        //   ImGui::TextColored(ImVec4(0.5F, 0.5F, 0.5F, 1.0F), "0x00000000");
+        //   ImGui::TableNextColumn();
+        //   ImGui::TextColored(ImVec4(0.5F, 0.5F, 0.5F, 1.0F), "0");
+        // }
+        ImGui::EndTable();
+      }
     }
     ImGui::Separator();
   }

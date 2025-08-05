@@ -65,6 +65,7 @@ class CPU {
   [[nodiscard]] unsigned long long GetStepCount() const;
   [[nodiscard]] uint32_t GetPC() const;
   [[nodiscard]] uint32_t Load(uint32_t address) const;
+  [[nodiscard]] COP0 GetCop0() const;
 
  private:
   uint32_t program_counter_ = bus::kBiosBase;

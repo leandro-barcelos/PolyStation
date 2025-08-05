@@ -84,6 +84,8 @@ uint32_t cpu::CPU::Load(const uint32_t address) const {
   return bus_.Load(address);
 }
 
+cpu::COP0 cpu::CPU::GetCop0() const { return cop0_; }
+
 void cpu::CPU::Store(const uint32_t address, const uint32_t value) {
   bus::Bus::Store(address, value);
 }
