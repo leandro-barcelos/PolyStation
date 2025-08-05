@@ -86,7 +86,12 @@ uint32_t cpu::CPU::Load(const uint32_t address) const {
 
 cpu::COP0 cpu::CPU::GetCop0() const { return cop0_; }
 
-void cpu::CPU::Store(const uint32_t address, const uint32_t value) {
+void cpu::CPU::Store(const uint32_t address, const uint32_t value) const {
+  if ((cop0_.status_register & 0x10000) != 0U) {
+    std::cout << "ignoring store while cache is isolated" << '\n';
+    return;
+  }
+
   bus::Bus::Store(address, value);
 }
 

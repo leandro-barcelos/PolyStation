@@ -75,7 +75,7 @@ class CPU {
   COP0 cop0_;
   unsigned long long step_count_ = 0;
 
-  static void Store(uint32_t address, uint32_t value);
+  void Store(uint32_t address, uint32_t value) const;
 
   void OpORI(const Instruction& instruction);
   void OpLUI(const Instruction& instruction);
