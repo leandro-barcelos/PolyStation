@@ -427,6 +427,10 @@ void app::Application::DrawControlWindow() {
     if (ImGui::Button("Reset", ImVec2(available_width, 0.0)) && !running_) {
       cpu_.Reset();
     }
+
+    ImGui::Separator();
+
+    ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
   }
   ImGui::End();
 }
@@ -815,9 +819,9 @@ void app::Application::SetupVulkanWindow() {
 
   // Select Present Mode
 #ifdef APP_USE_UNLIMITED_FRAME_RATE
-  VkPresentModeKHR present_modes[] = {VK_PRESENT_MODE_MAILBOX_KHR,
-                                      VK_PRESENT_MODE_IMMEDIATE_KHR,
-                                      VK_PRESENT_MODE_FIFO_KHR};
+  std::array present_modes = {VK_PRESENT_MODE_MAILBOX_KHR,
+                              VK_PRESENT_MODE_IMMEDIATE_KHR,
+                              VK_PRESENT_MODE_FIFO_KHR};
 #else
   std::array present_modes = {VK_PRESENT_MODE_FIFO_KHR};
 #endif
