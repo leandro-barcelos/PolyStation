@@ -220,9 +220,8 @@ std::ostream& cpu::operator<<(std::ostream& outs,
   }
 }
 
-template <typename T>
-std::string cpu::Instruction::ToString(const T& value) {
+std::string cpu::Instruction::ToString() const {
   std::ostringstream string_stream;
-  string_stream << value;
+  string_stream << *this;
   return string_stream.str();
 }

@@ -11,13 +11,10 @@ constexpr uint32_t kInstructionLength = 4;
 
 class Instruction {
  public:
+  Instruction() : data_(0) {}
   explicit Instruction(const uint32_t instruction) : data_(instruction) {}
 
-  friend std::ostream& operator<<(std::ostream& outs,
-                                  const Instruction& instruction);
-
-  template <typename T>
-  static std::string ToString(const T& value);
+  std::string ToString() const;
 
   enum class PrimaryOpcode : uint8_t {
     kSPECIAL = 0x00,
@@ -59,6 +56,7 @@ class CPU {
   void SetRegister(uint32_t index, uint32_t value);
   [[nodiscard]] unsigned long long GetStepCount() const;
   [[nodiscard]] uint32_t GetPC() const;
+  [[nodiscard]] uint32_t Load(uint32_t address) const;
 
  private:
   uint32_t program_counter_ = bus::kBiosBase;
@@ -67,7 +65,6 @@ class CPU {
   bus::Bus bus_;
   unsigned long long step_count_ = 0;
 
-  [[nodiscard]] uint32_t Load(uint32_t address) const;
   static void Store(uint32_t address, uint32_t value);
 
   void OpORI(const Instruction& instruction);
@@ -78,6 +75,8 @@ class CPU {
   void OpJ(const Instruction& instruction);
   void OpOR(const Instruction& instruction);
 };
+
+std::ostream& operator<<(std::ostream& outs, const Instruction& instruction);
 }  // namespace cpu
 
 #endif  // POLYSTATION_CPU_H_
