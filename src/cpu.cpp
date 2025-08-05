@@ -43,15 +43,16 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kLUI:
       OpLUI(instruction);
       break;
-    case Instruction::PrimaryOpcode::kCOP0:
+    case Instruction::PrimaryOpcode::kCOP0: {
       switch (const bool flag = instruction.GetCoprocessorFlag();
               instruction.GetCoprocessorOpcode(flag)) {
         default:
           throw std::runtime_error(std::format(
               "unhandled coprocessor opcode {:02X}",
-              static_cast<uint8_t>(instruction.GetSecondaryOpcode())));
+              static_cast<uint8_t>(instruction.GetCoprocessorOpcode(flag))));
       }
       break;
+    }
     case Instruction::PrimaryOpcode::kSW:
       OpSW(instruction);
       break;
