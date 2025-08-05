@@ -31,6 +31,7 @@ class Instruction {
 
   enum class CoprocessorOpcode : uint8_t {};
 
+  [[nodiscard]] uint32_t GetRawData() const { return data_; }
   [[nodiscard]] PrimaryOpcode GetPrimaryOpcode() const;
   [[nodiscard]] SecondaryOpcode GetSecondaryOpcode() const;
   [[nodiscard]] CoprocessorOpcode GetCoprocessorOpcode(bool flag) const;

@@ -189,7 +189,7 @@ std::ostream& cpu::operator<<(std::ostream& outs,
                      "or R{}, R{}, R{}", instruction.GetRegisterD(),
                      instruction.GetRegisterS(), instruction.GetRegisterT());
         default:
-          return outs << "";
+          return outs << std::format("0x{:08X}", instruction.GetRawData());
       }
     case Instruction::PrimaryOpcode::kJ:
       return outs << std::format("j {:07X}", instruction.GetImmediate26());
@@ -208,7 +208,7 @@ std::ostream& cpu::operator<<(std::ostream& outs,
       switch (const bool flag = instruction.GetCoprocessorFlag();
               instruction.GetCoprocessorOpcode(flag)) {
         default:
-          return outs << "";
+          return outs << std::format("0x{:08X}", instruction.GetRawData());
       }
     case Instruction::PrimaryOpcode::kSW:
       return outs << std::format("sw R{}, {:04X}(R{})",
@@ -216,7 +216,7 @@ std::ostream& cpu::operator<<(std::ostream& outs,
                                  instruction.GetImmediate16SignExtend(),
                                  instruction.GetRegisterS());
     default:
-      return outs << "";
+      return outs << std::format("0x{:08X}", instruction.GetRawData());
   }
 }
 
