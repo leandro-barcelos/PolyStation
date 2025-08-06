@@ -140,7 +140,7 @@ void cpu::CPU::OpSLL(const Instruction& instruction) {
 void cpu::CPU::OpADDIU(const Instruction& instruction) {
   const uint8_t register_t = instruction.GetRegisterT();
   const uint8_t register_s = instruction.GetRegisterS();
-  const uint16_t immediate = instruction.GetImmediate16();
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   gsl::at(registers_, register_t) = gsl::at(registers_, register_s) + immediate;
 }
