@@ -38,6 +38,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kBNE:
       OpBNE(instruction);
       break;
+    case Instruction::PrimaryOpcode::kADDI:
+      OpADDI(instruction);
+      break;
     case Instruction::PrimaryOpcode::kADDIU:
       OpADDIU(instruction);
       break;
@@ -187,6 +190,20 @@ void cpu::CPU::OpBNE(const Instruction& instruction) {
   }
 }
 
+void cpu::CPU::OpADDI(const Instruction& instruction) {
+  const uint8_t register_t = instruction.GetRegisterT();
+  const uint8_t register_s = instruction.GetRegisterS();
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  int32_t sum = 0;
+  if (CheckedSum<int32_t>(static_cast<int32_t>(gsl::at(registers_, register_s)),
+                          static_cast<int32_t>(immediate), &sum)) {
+    throw std::runtime_error("overflow in ADDI");
+  }
+
+  gsl::at(registers_, register_t) = static_cast<uint32_t>(sum);
+}
+
 cpu::Instruction::PrimaryOpcode cpu::Instruction::GetPrimaryOpcode() const {
   return static_cast<PrimaryOpcode>(data_ >> 26U & 0x3FU);
 }
@@ -247,6 +264,11 @@ std::ostream& cpu::operator<<(std::ostream& outs,
                  "bne R{}, R{}, {}", instruction.GetRegisterS(),
                  instruction.GetRegisterT(),
                  static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
+    case Instruction::PrimaryOpcode::kADDI:
+      return outs << std::format(
+                 "addi R{}, R{}, {}", instruction.GetRegisterT(),
+                 instruction.GetRegisterS(),
+                 static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
     case Instruction::PrimaryOpcode::kADDIU:
       return outs << std::format(
                  "addiu R{}, R{}, {:04X}", instruction.GetRegisterT(),
@@ -277,6 +299,14 @@ std::ostream& cpu::operator<<(std::ostream& outs,
     default:
       return outs << std::format("0x{:08X}", instruction.GetRawData());
   }
+}
+
+template <typename T>
+bool cpu::CheckedSum(T value_a, T value_b, T* result) {
+  *result = value_a + value_b;
+
+  return (value_b > 0 && value_a > std::numeric_limits<T>::max() - value_b) ||
+         (value_b < 0 && value_a < std::numeric_limits<T>::min() - value_b);
 }
 
 std::string cpu::Instruction::ToString() const {

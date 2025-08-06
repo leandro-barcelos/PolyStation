@@ -20,6 +20,7 @@ class Instruction {
     kSPECIAL = 0x00,
     kJ = 0x02,
     kBNE = 0x05,
+    kADDI = 0x08,
     kADDIU = 0x09,
     kORI = 0x0D,
     kLUI = 0x0F,
@@ -89,9 +90,13 @@ class CPU {
   void OpOR(const Instruction& instruction);
   void OpMTC(const Instruction& instruction);
   void OpBNE(const Instruction& instruction);
+  void OpADDI(const Instruction& instruction);
 };
 
 std::ostream& operator<<(std::ostream& outs, const Instruction& instruction);
+
+template <typename T>
+bool CheckedSum(T value_a, T value_b, T* result);
 }  // namespace cpu
 
 #endif  // POLYSTATION_CPU_H_
