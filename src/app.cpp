@@ -509,7 +509,7 @@ void app::Application::DrawControlWindow() {
 void app::Application::DrawCpuDisassembler() const {
   constexpr uint32_t kMaxInstructions = 25;
 
-  const uint32_t current_pc = cpu_.GetPC() - 4;
+  const uint32_t current_pc = cpu_.GetPrevPC();
 
   ImGui::Begin("PolyStation - CPU Disassembler");
 

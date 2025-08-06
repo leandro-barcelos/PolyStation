@@ -65,11 +65,13 @@ class CPU {
   void SetRegister(uint32_t index, uint32_t value);
   [[nodiscard]] unsigned long long GetStepCount() const;
   [[nodiscard]] uint32_t GetPC() const;
+  [[nodiscard]] uint32_t GetPrevPC() const;
   [[nodiscard]] uint32_t Load(uint32_t address) const;
   [[nodiscard]] COP0 GetCop0() const;
 
  private:
   uint32_t program_counter_ = bus::kBiosBase;
+  uint32_t prev_program_counter_ = bus::kBiosBase - 4;
   Instruction next_instruction_{0x0};
   std::array<uint32_t, kNumberOfRegisters> registers_{};
   bus::Bus bus_;

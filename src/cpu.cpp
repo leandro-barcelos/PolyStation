@@ -14,6 +14,7 @@ void cpu::CPU::Reset() {
 void cpu::CPU::Cycle() {
   const Instruction instruction = next_instruction_;
   next_instruction_ = Instruction(Load(program_counter_));
+  prev_program_counter_ = program_counter_;
   program_counter_ += kInstructionLength;
 
   switch (instruction.GetPrimaryOpcode()) {
@@ -82,6 +83,8 @@ void cpu::CPU::SetRegister(const uint32_t index, const uint32_t value) {
 unsigned long long cpu::CPU::GetStepCount() const { return step_count_; }
 
 uint32_t cpu::CPU::GetPC() const { return program_counter_; }
+
+uint32_t cpu::CPU::GetPrevPC() const { return prev_program_counter_; }
 
 uint32_t cpu::CPU::Load(const uint32_t address) const {
   return bus_.Load(address);
