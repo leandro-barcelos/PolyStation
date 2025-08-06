@@ -19,6 +19,7 @@ class Instruction {
   enum class PrimaryOpcode : uint8_t {
     kSPECIAL = 0x00,
     kJ = 0x02,
+    kBNE = 0x05,
     kADDIU = 0x09,
     kORI = 0x0D,
     kLUI = 0x0F,
@@ -85,6 +86,7 @@ class CPU {
   void OpJ(const Instruction& instruction);
   void OpOR(const Instruction& instruction);
   void OpMTC(const Instruction& instruction);
+  void OpBNE(const Instruction& instruction);
 };
 
 std::ostream& operator<<(std::ostream& outs, const Instruction& instruction);

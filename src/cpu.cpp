@@ -34,6 +34,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kJ:
       OpJ(instruction);
       break;
+    case Instruction::PrimaryOpcode::kBNE:
+      OpBNE(instruction);
+      break;
     case Instruction::PrimaryOpcode::kADDIU:
       OpADDIU(instruction);
       break;
@@ -171,6 +174,16 @@ void cpu::CPU::OpMTC(const Instruction& instruction) {
   }
 }
 
+void cpu::CPU::OpBNE(const Instruction& instruction) {
+  const uint8_t register_s = instruction.GetRegisterS();
+  const uint8_t register_t = instruction.GetRegisterT();
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  if (gsl::at(registers_, register_s) != gsl::at(registers_, register_t)) {
+    program_counter_ += 4 | (immediate << 2U);
+  }
+}
+
 cpu::Instruction::PrimaryOpcode cpu::Instruction::GetPrimaryOpcode() const {
   return static_cast<PrimaryOpcode>(data_ >> 26U & 0x3FU);
 }
@@ -226,6 +239,11 @@ std::ostream& cpu::operator<<(std::ostream& outs,
       }
     case Instruction::PrimaryOpcode::kJ:
       return outs << std::format("j {:07X}", instruction.GetImmediate26());
+    case Instruction::PrimaryOpcode::kBNE:
+      return outs << std::format(
+                 "bne R{}, R{}, {}", instruction.GetRegisterS(),
+                 instruction.GetRegisterT(),
+                 static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
     case Instruction::PrimaryOpcode::kADDIU:
       return outs << std::format(
                  "addiu R{}, R{}, {:04X}", instruction.GetRegisterT(),
