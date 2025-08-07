@@ -92,7 +92,7 @@ class CPU {
   void OpLUI(const Instruction& instruction);
   void OpCOP0(const Instruction& instruction);
   void OpMTC(const Instruction& instruction);
-  void OpSW(const Instruction& instruction);
+  void OpSW(const Instruction& instruction) const;
 };
 
 std::ostream& operator<<(std::ostream& outs, const Instruction& instruction);
