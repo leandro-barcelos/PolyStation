@@ -91,7 +91,7 @@ class CPU {
   void OpORI(const Instruction& instruction);
   void OpLUI(const Instruction& instruction);
   void OpCOP0(const Instruction& instruction);
-  void OpMTC(const Instruction& instruction);
+  void OpMTC0(const Instruction& instruction);
   void OpSW(const Instruction& instruction) const;
 };
 

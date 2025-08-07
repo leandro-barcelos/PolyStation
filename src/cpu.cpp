@@ -171,7 +171,7 @@ void cpu::CPU::OpCOP0(const Instruction& instruction) {
   switch (const bool flag = instruction.GetCoprocessorFlag();
           instruction.GetCoprocessorOpcode(flag)) {
     case Instruction::CoprocessorOpcode::kMTC:
-      OpMTC(instruction);
+      OpMTC0(instruction);
       break;
     default:
       throw std::runtime_error(std::format(
@@ -180,23 +180,16 @@ void cpu::CPU::OpCOP0(const Instruction& instruction) {
   }
 }
 
-void cpu::CPU::OpMTC(const Instruction& instruction) {
-  switch (instruction.GetCoprocessor()) {
-    case 0: {
-      const uint32_t register_t = GetRegister(instruction.GetT());
-      switch (instruction.GetD()) {
-        case COP0::Registers::kStatusRegister:
-          cop0_.status_register = register_t;
-          break;
-        default:
-          throw std::runtime_error(
-              std::format("unhandled cop0 register {}", instruction.GetD()));
-      }
+void cpu::CPU::OpMTC0(const Instruction& instruction) {
+  const uint32_t register_t = GetRegister(instruction.GetT());
+
+  switch (instruction.GetD()) {
+    case COP0::Registers::kStatusRegister:
+      cop0_.status_register = register_t;
       break;
-    }
     default:
-      throw std::runtime_error(std::format("unhandled coprocessor COP{}",
-                                           instruction.GetCoprocessor()));
+      throw std::runtime_error(
+          std::format("unhandled cop0 register {}", instruction.GetD()));
   }
 }
 
