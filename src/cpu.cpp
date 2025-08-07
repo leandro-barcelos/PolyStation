@@ -19,18 +19,7 @@ void cpu::CPU::Cycle() {
 
   switch (instruction.GetPrimaryOpcode()) {
     case Instruction::PrimaryOpcode::kSPECIAL:
-      switch (instruction.GetSecondaryOpcode()) {
-        case Instruction::SecondaryOpcode::kSLL:
-          OpSLL(instruction);
-          break;
-        case Instruction::SecondaryOpcode::kOR:
-          OpOR(instruction);
-          break;
-        default:
-          throw std::runtime_error(std::format(
-              "unhandled secondary opcode {:02X}",
-              static_cast<uint8_t>(instruction.GetSecondaryOpcode())));
-      }
+      OpSPECIAL(instruction);
       break;
     case Instruction::PrimaryOpcode::kJ:
       OpJ(instruction);
@@ -51,16 +40,7 @@ void cpu::CPU::Cycle() {
       OpLUI(instruction);
       break;
     case Instruction::PrimaryOpcode::kCOP0: {
-      switch (const bool flag = instruction.GetCoprocessorFlag();
-              instruction.GetCoprocessorOpcode(flag)) {
-        case Instruction::CoprocessorOpcode::kMTC:
-          OpMTC(instruction);
-          break;
-        default:
-          throw std::runtime_error(std::format(
-              "unhandled coprocessor opcode {:02X}",
-              static_cast<uint8_t>(instruction.GetCoprocessorOpcode(flag))));
-      }
+      OpCOP0(instruction);
       break;
     }
     case Instruction::PrimaryOpcode::kSW:
@@ -104,45 +84,37 @@ void cpu::CPU::Store(const uint32_t address, const uint32_t value) const {
   bus::Bus::Store(address, value);
 }
 
-void cpu::CPU::OpORI(const Instruction& instruction) {
-  const uint8_t register_s = instruction.GetRegisterS();
-  const uint8_t register_t = instruction.GetRegisterT();
-  const uint16_t immediate = instruction.GetImmediate16();
-
-  gsl::at(registers_, register_t) = gsl::at(registers_, register_s) | immediate;
-}
-
-void cpu::CPU::OpLUI(const Instruction& instruction) {
-  const uint8_t register_t = instruction.GetRegisterT();
-  const uint16_t immediate = instruction.GetImmediate16();
-
-  gsl::at(registers_, register_t) = immediate << 16U;
-}
-
-void cpu::CPU::OpSW(const Instruction& instruction) {
-  const uint8_t register_s = instruction.GetRegisterS();
-  const uint8_t register_t = instruction.GetRegisterT();
-  const uint32_t immediate = instruction.GetImmediate16SignExtend();
-
-  const uint32_t address = gsl::at(registers_, register_s) + immediate;
-  Store(address, gsl::at(registers_, register_t));
+void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
+  switch (instruction.GetSecondaryOpcode()) {
+    case Instruction::SecondaryOpcode::kSLL:
+      OpSLL(instruction);
+      break;
+    case Instruction::SecondaryOpcode::kOR:
+      OpOR(instruction);
+      break;
+    default:
+      throw std::runtime_error(
+          std::format("unhandled secondary opcode {:02X}",
+                      static_cast<uint8_t>(instruction.GetSecondaryOpcode())));
+  }
 }
 
 void cpu::CPU::OpSLL(const Instruction& instruction) {
-  const uint8_t register_t = instruction.GetRegisterT();
-  const uint32_t register_d = instruction.GetRegisterD();
+  const uint8_t register_t = instruction.GetT();
+  const uint32_t register_d = instruction.GetD();
   const uint16_t immediate = instruction.GetImmediate16();
 
   gsl::at(registers_, register_d) = gsl::at(registers_, register_t)
                                     << immediate;
 }
 
-void cpu::CPU::OpADDIU(const Instruction& instruction) {
-  const uint8_t register_t = instruction.GetRegisterT();
-  const uint8_t register_s = instruction.GetRegisterS();
-  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+void cpu::CPU::OpOR(const Instruction& instruction) {
+  const uint8_t register_s = instruction.GetS();
+  const uint8_t register_t = instruction.GetT();
+  const uint8_t register_d = instruction.GetD();
 
-  gsl::at(registers_, register_t) = gsl::at(registers_, register_s) + immediate;
+  gsl::at(registers_, register_d) =
+      gsl::at(registers_, register_s) | gsl::at(registers_, register_t);
 }
 
 void cpu::CPU::OpJ(const Instruction& instruction) {
@@ -151,20 +123,71 @@ void cpu::CPU::OpJ(const Instruction& instruction) {
   program_counter_ = (program_counter_ & 0xF0000000) | (immediate << 2U);
 }
 
-void cpu::CPU::OpOR(const Instruction& instruction) {
-  const uint8_t register_s = instruction.GetRegisterS();
-  const uint8_t register_t = instruction.GetRegisterT();
-  const uint8_t register_d = instruction.GetRegisterD();
+void cpu::CPU::OpBNE(const Instruction& instruction) {
+  const uint8_t register_s = instruction.GetS();
+  const uint8_t register_t = instruction.GetT();
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
-  gsl::at(registers_, register_d) =
-      gsl::at(registers_, register_s) | gsl::at(registers_, register_t);
+  if (gsl::at(registers_, register_s) != gsl::at(registers_, register_t)) {
+    program_counter_ += 4 | (immediate << 2U);
+  }
+}
+
+void cpu::CPU::OpADDI(const Instruction& instruction) {
+  const uint8_t register_t = instruction.GetT();
+  const uint8_t register_s = instruction.GetS();
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  int32_t sum = 0;
+  if (CheckedSum<int32_t>(static_cast<int32_t>(gsl::at(registers_, register_s)),
+                          static_cast<int32_t>(immediate), &sum)) {
+    throw std::runtime_error("overflow in ADDI");
+  }
+
+  gsl::at(registers_, register_t) = static_cast<uint32_t>(sum);
+}
+
+void cpu::CPU::OpADDIU(const Instruction& instruction) {
+  const uint8_t register_t = instruction.GetT();
+  const uint8_t register_s = instruction.GetS();
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  gsl::at(registers_, register_t) = gsl::at(registers_, register_s) + immediate;
+}
+
+void cpu::CPU::OpORI(const Instruction& instruction) {
+  const uint8_t register_s = instruction.GetS();
+  const uint8_t register_t = instruction.GetT();
+  const uint16_t immediate = instruction.GetImmediate16();
+
+  gsl::at(registers_, register_t) = gsl::at(registers_, register_s) | immediate;
+}
+
+void cpu::CPU::OpLUI(const Instruction& instruction) {
+  const uint8_t register_t = instruction.GetT();
+  const uint16_t immediate = instruction.GetImmediate16();
+
+  gsl::at(registers_, register_t) = immediate << 16U;
+}
+
+void cpu::CPU::OpCOP0(const Instruction& instruction) {
+  switch (const bool flag = instruction.GetCoprocessorFlag();
+          instruction.GetCoprocessorOpcode(flag)) {
+    case Instruction::CoprocessorOpcode::kMTC:
+      OpMTC(instruction);
+      break;
+    default:
+      throw std::runtime_error(std::format(
+          "unhandled coprocessor opcode {:02X}",
+          static_cast<uint8_t>(instruction.GetCoprocessorOpcode(flag))));
+  }
 }
 
 void cpu::CPU::OpMTC(const Instruction& instruction) {
   switch (instruction.GetCoprocessor()) {
     case 0: {
-      const uint8_t register_t = instruction.GetRegisterT();
-      switch (uint8_t register_d = instruction.GetRegisterD()) {
+      const uint8_t register_t = instruction.GetT();
+      switch (uint8_t register_d = instruction.GetD()) {
         case COP0::Registers::kStatusRegister:
           cop0_.status_register = gsl::at(registers_, register_t);
           break;
@@ -180,28 +203,13 @@ void cpu::CPU::OpMTC(const Instruction& instruction) {
   }
 }
 
-void cpu::CPU::OpBNE(const Instruction& instruction) {
-  const uint8_t register_s = instruction.GetRegisterS();
-  const uint8_t register_t = instruction.GetRegisterT();
+void cpu::CPU::OpSW(const Instruction& instruction) {
+  const uint8_t register_s = instruction.GetS();
+  const uint8_t register_t = instruction.GetT();
   const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
-  if (gsl::at(registers_, register_s) != gsl::at(registers_, register_t)) {
-    program_counter_ += 4 | (immediate << 2U);
-  }
-}
-
-void cpu::CPU::OpADDI(const Instruction& instruction) {
-  const uint8_t register_t = instruction.GetRegisterT();
-  const uint8_t register_s = instruction.GetRegisterS();
-  const uint32_t immediate = instruction.GetImmediate16SignExtend();
-
-  int32_t sum = 0;
-  if (CheckedSum<int32_t>(static_cast<int32_t>(gsl::at(registers_, register_s)),
-                          static_cast<int32_t>(immediate), &sum)) {
-    throw std::runtime_error("overflow in ADDI");
-  }
-
-  gsl::at(registers_, register_t) = static_cast<uint32_t>(sum);
+  const uint32_t address = gsl::at(registers_, register_s) + immediate;
+  Store(address, gsl::at(registers_, register_t));
 }
 
 cpu::Instruction::PrimaryOpcode cpu::Instruction::GetPrimaryOpcode() const {
@@ -226,11 +234,11 @@ bool cpu::Instruction::GetCoprocessorFlag() const {
   return (data_ >> 25U & 0x1U) == 1;
 }
 
-uint8_t cpu::Instruction::GetRegisterS() const { return data_ >> 21U & 0x1FU; }
+uint8_t cpu::Instruction::GetS() const { return data_ >> 21U & 0x1FU; }
 
-uint8_t cpu::Instruction::GetRegisterT() const { return data_ >> 16U & 0x1FU; }
+uint8_t cpu::Instruction::GetT() const { return data_ >> 16U & 0x1FU; }
 
-uint8_t cpu::Instruction::GetRegisterD() const { return data_ >> 11U & 0x1FU; }
+uint8_t cpu::Instruction::GetD() const { return data_ >> 11U & 0x1FU; }
 
 uint16_t cpu::Instruction::GetImmediate16() const { return data_ & 0xFFFFU; }
 
@@ -247,13 +255,12 @@ std::ostream& cpu::operator<<(std::ostream& outs,
     case Instruction::PrimaryOpcode::kSPECIAL:
       switch (instruction.GetSecondaryOpcode()) {
         case Instruction::SecondaryOpcode::kSLL:
-          return outs << std::format(
-                     "sll R{}, R{}, {:04X}", instruction.GetRegisterD(),
-                     instruction.GetRegisterT(), instruction.GetImmediate16());
+          return outs << std::format("sll R{}, R{}, {:04X}", instruction.GetD(),
+                                     instruction.GetT(),
+                                     instruction.GetImmediate16());
         case Instruction::SecondaryOpcode::kOR:
-          return outs << std::format(
-                     "or R{}, R{}, R{}", instruction.GetRegisterD(),
-                     instruction.GetRegisterS(), instruction.GetRegisterT());
+          return outs << std::format("or R{}, R{}, R{}", instruction.GetD(),
+                                     instruction.GetS(), instruction.GetT());
         default:
           return outs << std::format("0x{:08X}", instruction.GetRawData());
       }
@@ -261,24 +268,22 @@ std::ostream& cpu::operator<<(std::ostream& outs,
       return outs << std::format("j {:07X}", instruction.GetImmediate26());
     case Instruction::PrimaryOpcode::kBNE:
       return outs << std::format(
-                 "bne R{}, R{}, {}", instruction.GetRegisterS(),
-                 instruction.GetRegisterT(),
+                 "bne R{}, R{}, {}", instruction.GetS(), instruction.GetT(),
                  static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
     case Instruction::PrimaryOpcode::kADDI:
       return outs << std::format(
-                 "addi R{}, R{}, {}", instruction.GetRegisterT(),
-                 instruction.GetRegisterS(),
+                 "addi R{}, R{}, {}", instruction.GetT(), instruction.GetS(),
                  static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
     case Instruction::PrimaryOpcode::kADDIU:
-      return outs << std::format(
-                 "addiu R{}, R{}, {:04X}", instruction.GetRegisterT(),
-                 instruction.GetRegisterS(), instruction.GetImmediate16());
+      return outs << std::format("addiu R{}, R{}, {:04X}", instruction.GetT(),
+                                 instruction.GetS(),
+                                 instruction.GetImmediate16());
     case Instruction::PrimaryOpcode::kORI:
-      return outs << std::format(
-                 "ori R{}, R{}, {:04X}", instruction.GetRegisterT(),
-                 instruction.GetRegisterS(), instruction.GetImmediate16());
+      return outs << std::format("ori R{}, R{}, {:04X}", instruction.GetT(),
+                                 instruction.GetS(),
+                                 instruction.GetImmediate16());
     case Instruction::PrimaryOpcode::kLUI:
-      return outs << std::format("lui R{}, {:04X}", instruction.GetRegisterT(),
+      return outs << std::format("lui R{}, {:04X}", instruction.GetT(),
                                  instruction.GetImmediate16());
     case Instruction::PrimaryOpcode::kCOP0:
       switch (const bool flag = instruction.GetCoprocessorFlag();
@@ -286,16 +291,15 @@ std::ostream& cpu::operator<<(std::ostream& outs,
         case Instruction::CoprocessorOpcode::kMTC:
           return outs << std::format(
                      "mtc{} R{}, cop{}dat{}", instruction.GetCoprocessor(),
-                     instruction.GetRegisterT(), instruction.GetCoprocessor(),
-                     instruction.GetRegisterD());
+                     instruction.GetT(), instruction.GetCoprocessor(),
+                     instruction.GetD());
         default:
           return outs << std::format("0x{:08X}", instruction.GetRawData());
       }
     case Instruction::PrimaryOpcode::kSW:
-      return outs << std::format("sw R{}, {:04X}(R{})",
-                                 instruction.GetRegisterT(),
+      return outs << std::format("sw R{}, {:04X}(R{})", instruction.GetT(),
                                  instruction.GetImmediate16SignExtend(),
-                                 instruction.GetRegisterS());
+                                 instruction.GetS());
     default:
       return outs << std::format("0x{:08X}", instruction.GetRawData());
   }

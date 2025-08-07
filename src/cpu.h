@@ -14,7 +14,7 @@ class Instruction {
   Instruction() : data_(0) {}
   explicit Instruction(const uint32_t instruction) : data_(instruction) {}
 
-  std::string ToString() const;
+  [[nodiscard]] std::string ToString() const;
 
   enum class PrimaryOpcode : uint8_t {
     kSPECIAL = 0x00,
@@ -39,9 +39,9 @@ class Instruction {
   [[nodiscard]] CoprocessorOpcode GetCoprocessorOpcode(bool flag) const;
   [[nodiscard]] uint8_t GetCoprocessor() const;
   [[nodiscard]] bool GetCoprocessorFlag() const;
-  [[nodiscard]] uint8_t GetRegisterS() const;
-  [[nodiscard]] uint8_t GetRegisterT() const;
-  [[nodiscard]] uint8_t GetRegisterD() const;
+  [[nodiscard]] uint8_t GetS() const;
+  [[nodiscard]] uint8_t GetT() const;
+  [[nodiscard]] uint8_t GetD() const;
   [[nodiscard]] uint16_t GetImmediate16() const;
   [[nodiscard]] uint32_t GetImmediate16SignExtend() const;
   [[nodiscard]] uint32_t GetImmediate26() const;
@@ -81,16 +81,18 @@ class CPU {
 
   void Store(uint32_t address, uint32_t value) const;
 
-  void OpORI(const Instruction& instruction);
-  void OpLUI(const Instruction& instruction);
-  void OpSW(const Instruction& instruction);
+  void OpSPECIAL(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
-  void OpADDIU(const Instruction& instruction);
-  void OpJ(const Instruction& instruction);
   void OpOR(const Instruction& instruction);
-  void OpMTC(const Instruction& instruction);
+  void OpJ(const Instruction& instruction);
   void OpBNE(const Instruction& instruction);
   void OpADDI(const Instruction& instruction);
+  void OpADDIU(const Instruction& instruction);
+  void OpORI(const Instruction& instruction);
+  void OpLUI(const Instruction& instruction);
+  void OpCOP0(const Instruction& instruction);
+  void OpMTC(const Instruction& instruction);
+  void OpSW(const Instruction& instruction);
 };
 
 std::ostream& operator<<(std::ostream& outs, const Instruction& instruction);
