@@ -61,6 +61,9 @@ class Application {
   bool show_error_popup_ = false;
   std::array<char, 1024> error_message_{};
 
+  bool step_to_pc_ = false;
+  uint32_t target_pc_ = bus::kBiosBase;
+
   void InitSDL();
   void InitVulkan();
   void InitImGui() const;

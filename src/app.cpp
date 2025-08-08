@@ -170,6 +170,11 @@ void app::Application::MainLoop() {
                       std::format("CPU Exception: {}", e.what()).c_str());
         show_error_popup_ = true;
       }
+
+      if (step_to_pc_ && cpu_.GetPrevPC() == target_pc_) {
+        running_ = false;
+        step_to_pc_ = false;
+      }
     }
 
     RenderFrame();
@@ -483,6 +488,8 @@ void app::Application::DrawControlWindow() {
 
     ImGui::Text("Status: %s", running_ ? "Running" : "Paused");
 
+    ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
+
     ImGui::Separator();
 
     if (ImGui::Button("Step one", ImVec2(available_width, 0.0)) && !running_) {
@@ -495,13 +502,25 @@ void app::Application::DrawControlWindow() {
       }
     }
 
-    if (ImGui::Button("Reset", ImVec2(available_width, 0.0)) && !running_) {
-      cpu_.Reset();
+    ImGui::Separator();
+
+    constexpr uint32_t kProgramCounterStep = 4;
+    constexpr uint32_t kProgramCounterFastStep = 400;
+    ImGui::InputScalar("Target", ImGuiDataType_U32, &target_pc_,
+                       &kProgramCounterStep, &kProgramCounterFastStep, "%08X");
+
+    if (ImGui::Button("Step to PC", ImVec2(available_width, 0.0)) &&
+        !running_) {
+      running_ = true;
+      step_to_pc_ = true;
     }
 
     ImGui::Separator();
 
-    ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
+    if (ImGui::Button("Reset", ImVec2(available_width, 0.0)) && !running_) {
+      cpu_.Reset();
+      target_pc_ = bus::kBiosBase;
+    }
   }
   ImGui::End();
 }
