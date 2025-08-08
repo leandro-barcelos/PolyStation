@@ -11,7 +11,7 @@ bool cpu::COP0::IsCacheIsolated() const {
 void cpu::CPU::Reset() {
   program_counter_ = bus::kBiosBase;
   next_instruction_ = Instruction(0x0);
-  registers_.fill(0);
+  read_registers_.fill(0);
   step_count_ = 0;
 }
 
@@ -20,6 +20,10 @@ void cpu::CPU::Cycle() {
   next_instruction_ = Instruction(Load(program_counter_));
   prev_program_counter_ = program_counter_;
   program_counter_ += kInstructionLength;
+
+  auto [index, value] = load_delay_slots_;
+  SetRegister(index, value);
+  load_delay_slots_ = LoadDelaySlots();
 
   switch (instruction.GetPrimaryOpcode()) {
     case Instruction::PrimaryOpcode::kSPECIAL:
@@ -43,10 +47,12 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kLUI:
       OpLUI(instruction);
       break;
-    case Instruction::PrimaryOpcode::kCOP0: {
+    case Instruction::PrimaryOpcode::kCOP0:
       OpCOP0(instruction);
       break;
-    }
+    case Instruction::PrimaryOpcode::kLW:
+      OpLW(instruction);
+      break;
     case Instruction::PrimaryOpcode::kSW:
       OpSW(instruction);
       break;
@@ -56,11 +62,13 @@ void cpu::CPU::Cycle() {
                       static_cast<uint8_t>(instruction.GetPrimaryOpcode())));
   }
 
+  read_registers_ = write_registers_;
+
   step_count_++;
 }
 
 uint32_t cpu::CPU::GetRegister(const uint32_t index) const {
-  return gsl::at(registers_, index);
+  return gsl::at(read_registers_, index);
 }
 
 void cpu::CPU::SetRegister(const uint32_t index, const uint32_t value) {
@@ -68,7 +76,7 @@ void cpu::CPU::SetRegister(const uint32_t index, const uint32_t value) {
     throw std::runtime_error("tried to write to register zero");
   }
 
-  gsl::at(registers_, index) = value;
+  gsl::at(write_registers_, index) = value;
 }
 
 unsigned long long cpu::CPU::GetStepCount() const { return step_count_; }
@@ -201,6 +209,21 @@ void cpu::CPU::OpMTC0(const Instruction& instruction) {
   }
 }
 
+void cpu::CPU::OpLW(const Instruction& instruction) {
+  if (cop0_.IsCacheIsolated()) {
+    std::cout << "ignoring load while cache is isolated" << '\n';
+    return;
+  }
+
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  const uint32_t address = register_s + immediate;
+  const uint32_t value = bus_.Load(address);
+
+  load_delay_slots_ = LoadDelaySlots(instruction.GetT(), value);
+}
+
 void cpu::CPU::OpSW(const Instruction& instruction) const {
   const uint32_t register_s = GetRegister(instruction.GetS());
   const uint32_t register_t = GetRegister(instruction.GetT());
@@ -294,6 +317,10 @@ std::ostream& cpu::operator<<(std::ostream& outs,
         default:
           return outs << std::format("0x{:08X}", instruction.GetRawData());
       }
+    case Instruction::PrimaryOpcode::kLW:
+      return outs << std::format("lw R{}, {:04X}(R{})", instruction.GetT(),
+                                 instruction.GetImmediate16SignExtend(),
+                                 instruction.GetS());
     case Instruction::PrimaryOpcode::kSW:
       return outs << std::format("sw R{}, {:04X}(R{})", instruction.GetT(),
                                  instruction.GetImmediate16SignExtend(),

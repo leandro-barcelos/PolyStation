@@ -25,6 +25,7 @@ class Instruction {
     kORI = 0x0D,
     kLUI = 0x0F,
     kCOP0 = 0x10,
+    kLW = 0x23,
     kSW = 0x2B,
     kNOP = 0xFF
   };
@@ -58,9 +59,14 @@ struct COP0 {
   [[nodiscard]] bool IsCacheIsolated() const;
 };
 
+struct LoadDelaySlots {
+  uint32_t index = 0;
+  uint32_t value = 0;
+} __attribute__((aligned(8)));
+
 class CPU {
  public:
-  explicit CPU(const std::string& path) : bus_(path) { registers_[0] = 0; }
+  explicit CPU(const std::string& path) : bus_(path) { read_registers_[0] = 0; }
 
   void Reset();
   void Cycle();
@@ -76,7 +82,9 @@ class CPU {
   uint32_t program_counter_ = bus::kBiosBase;
   uint32_t prev_program_counter_ = bus::kBiosBase - 4;
   Instruction next_instruction_{0x0};
-  std::array<uint32_t, kNumberOfRegisters> registers_{};
+  std::array<uint32_t, kNumberOfRegisters> read_registers_{};
+  std::array<uint32_t, kNumberOfRegisters> write_registers_ = read_registers_;
+  LoadDelaySlots load_delay_slots_{};
   bus::Bus bus_;
   COP0 cop0_;
   unsigned long long step_count_ = 0;
@@ -94,6 +102,7 @@ class CPU {
   void OpLUI(const Instruction& instruction);
   void OpCOP0(const Instruction& instruction);
   void OpMTC0(const Instruction& instruction);
+  void OpLW(const Instruction& instruction);
   void OpSW(const Instruction& instruction) const;
 };
 
