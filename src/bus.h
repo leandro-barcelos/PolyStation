@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "bios.h"
+#include "ram.h"
 
 namespace bus {
 constexpr uint32_t kMemoryControlBase = 0x1F801000;
@@ -14,7 +15,8 @@ enum class MemoryRegion : uint8_t {
   kBios,
   kMemoryControl,
   kRamSize,
-  kCacheControl
+  kCacheControl,
+  kRam
 };
 
 std::optional<MemoryRegion> GetMemoryRegionByAddress(uint32_t address);
@@ -28,6 +30,7 @@ class Bus {
 
  private:
   bios::Bios bios_;
+  ram::Ram ram_;
 };
 }  // namespace bus
 

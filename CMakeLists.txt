@@ -41,10 +41,15 @@ target_compile_definitions(imgui PUBLIC
 
 add_executable(PolyStation src/main.cpp
         src/bios.cpp
+        src/bios.h
         src/bus.cpp
+        src/bus.h
         src/cpu.cpp
+        src/cpu.h
         src/app.cpp
-        src/app.h)
+        src/app.h
+        src/ram.cpp
+        src/ram.h)
 
 target_link_libraries(PolyStation PRIVATE
         Microsoft.GSL::GSL
