@@ -12,7 +12,8 @@ std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
   if (address == kRamSizeBase) {
     return MemoryRegion::kRamSize;
   }
-  if (address >= kBiosBase && address < kBiosBase + kBiosSize) {
+  if (address >= bios::kBiosBase &&
+      address < bios::kBiosBase + bios::kBiosSize) {
     return MemoryRegion::kBios;
   }
   if (address == kCacheControlBase) {
