@@ -203,6 +203,15 @@ void cpu::CPU::OpMTC0(const Instruction& instruction) {
     case COP0::Registers::kStatusRegister:
       cop0_.status_register = register_t;
       break;
+    case COP0::Registers::kBPC:
+    case COP0::Registers::kBDA:
+    case COP0::Registers::kTAR:
+    case COP0::Registers::kDCIC:
+    case COP0::Registers::kBDAM:
+    case COP0::Registers::kBPCM:
+    case COP0::Registers::kCAUSE:
+      std::cout << "ignoring write to debug COP0 register" << '\n';
+      break;
     default:
       throw std::runtime_error(
           std::format("unhandled cop0 register {}", instruction.GetD()));

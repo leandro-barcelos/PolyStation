@@ -54,7 +54,16 @@ class Instruction {
 struct COP0 {
   uint32_t status_register = 0;
 
-  enum Registers : uint8_t { kStatusRegister = 0xC };
+  enum Registers : uint8_t {
+    kBPC = 0x3,
+    kBDA = 0x5,
+    kTAR = 0x6,
+    kDCIC = 0x7,
+    kBDAM = 0x9,
+    kBPCM = 0xB,
+    kStatusRegister = 0xC,
+    kCAUSE = 0xD
+  };
 
   [[nodiscard]] bool IsCacheIsolated() const;
 };
