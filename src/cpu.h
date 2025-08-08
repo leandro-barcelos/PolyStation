@@ -54,6 +54,8 @@ struct COP0 {
   uint32_t status_register = 0;
 
   enum Registers : uint8_t { kStatusRegister = 0xC };
+
+  [[nodiscard]] bool IsCacheIsolated() const;
 };
 
 class CPU {
