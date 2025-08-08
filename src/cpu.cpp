@@ -135,7 +135,7 @@ void cpu::CPU::OpBNE(const Instruction& instruction) {
   const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   if (register_s != register_t) {
-    program_counter_ += 4 | (immediate << 2U);
+    program_counter_ += 4 + (immediate << 2U);
   }
 }
 
