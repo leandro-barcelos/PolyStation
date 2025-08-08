@@ -91,13 +91,13 @@ uint32_t cpu::CPU::Load(const uint32_t address) const {
 
 cpu::COP0 cpu::CPU::GetCop0() const { return cop0_; }
 
-void cpu::CPU::Store(const uint32_t address, const uint32_t value) const {
+void cpu::CPU::Store(const uint32_t address, const uint32_t value) {
   if (cop0_.IsCacheIsolated()) {
     std::cout << "ignoring store while cache is isolated" << '\n';
     return;
   }
 
-  bus::Bus::Store(address, value);
+  bus_.Store(address, value);
 }
 
 void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
@@ -233,7 +233,7 @@ void cpu::CPU::OpLW(const Instruction& instruction) {
   load_delay_slots_ = LoadDelaySlots(instruction.GetT(), value);
 }
 
-void cpu::CPU::OpSW(const Instruction& instruction) const {
+void cpu::CPU::OpSW(const Instruction& instruction) {
   const uint32_t register_s = GetRegister(instruction.GetS());
   const uint32_t register_t = GetRegister(instruction.GetT());
   const uint32_t immediate = instruction.GetImmediate16SignExtend();

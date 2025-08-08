@@ -98,7 +98,7 @@ class CPU {
   COP0 cop0_;
   unsigned long long step_count_ = 0;
 
-  void Store(uint32_t address, uint32_t value) const;
+  void Store(uint32_t address, uint32_t value);
 
   void OpSPECIAL(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
@@ -112,7 +112,7 @@ class CPU {
   void OpCOP0(const Instruction& instruction);
   void OpMTC0(const Instruction& instruction);
   void OpLW(const Instruction& instruction);
-  void OpSW(const Instruction& instruction) const;
+  void OpSW(const Instruction& instruction);
 };
 
 std::ostream& operator<<(std::ostream& outs, const Instruction& instruction);

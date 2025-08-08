@@ -26,7 +26,7 @@ class Bus {
   explicit Bus(const std::string& path) : bios_(path) {}
 
   [[nodiscard]] uint32_t Load(uint32_t address) const;
-  static void Store(uint32_t address, uint32_t value);
+  void Store(uint32_t address, uint32_t value);
 
  private:
   bios::Bios bios_;

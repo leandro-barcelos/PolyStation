@@ -92,6 +92,11 @@ void bus::Bus::Store(uint32_t address, uint32_t value) {
     case MemoryRegion::kCacheControl:
       std::cout << "unhandled write to Cache Control register" << '\n';
       break;
+    case MemoryRegion::kRam: {
+      const uint32_t offset = address - ram::kRamBase;
+      ram_.Store(offset, value);
+      break;
+    }
     default:
       throw std::runtime_error(
           std::format("unhandled store into address: {:08X}", address));
