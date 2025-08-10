@@ -108,6 +108,9 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
     case Instruction::SecondaryOpcode::kOR:
       OpOR(instruction);
       break;
+    case Instruction::SecondaryOpcode::kSLTU:
+      OpSLTU(instruction);
+      break;
     default:
       throw std::runtime_error(
           std::format("unhandled secondary opcode {:02X}",
@@ -129,6 +132,13 @@ void cpu::CPU::OpOR(const Instruction& instruction) {
 
   const uint32_t result = register_s | register_t;
   SetRegister(instruction.GetD(), result);
+}
+
+void cpu::CPU::OpSLTU(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t register_t = GetRegister(instruction.GetT());
+
+  SetRegister(instruction.GetD(), register_s < register_t ? 1 : 0);
 }
 
 void cpu::CPU::OpJ(const Instruction& instruction) {
@@ -290,6 +300,9 @@ std::ostream& cpu::operator<<(std::ostream& outs,
                                      instruction.GetImmediate16());
         case Instruction::SecondaryOpcode::kOR:
           return outs << std::format("or R{}, R{}, R{}", instruction.GetD(),
+                                     instruction.GetS(), instruction.GetT());
+        case Instruction::SecondaryOpcode::kSLTU:
+          return outs << std::format("sltu R{}, R{}, R{}", instruction.GetD(),
                                      instruction.GetS(), instruction.GetT());
         default:
           return outs << std::format("0x{:08X}", instruction.GetRawData());

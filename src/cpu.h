@@ -30,7 +30,11 @@ class Instruction {
     kNOP = 0xFF
   };
 
-  enum class SecondaryOpcode : uint8_t { kSLL = 0x00, kOR = 0x25 };
+  enum class SecondaryOpcode : uint8_t {
+    kSLL = 0x00,
+    kOR = 0x25,
+    kSLTU = 0x2B
+  };
 
   enum class CoprocessorOpcode : uint8_t { kMTC = 0x04 };
 
@@ -103,6 +107,7 @@ class CPU {
   void OpSPECIAL(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
   void OpOR(const Instruction& instruction);
+  void OpSLTU(const Instruction& instruction);
   void OpJ(const Instruction& instruction);
   void OpBNE(const Instruction& instruction);
   void OpADDI(const Instruction& instruction);
