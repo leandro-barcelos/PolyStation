@@ -53,6 +53,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kLW:
       OpLW(instruction);
       break;
+    case Instruction::PrimaryOpcode::kSH:
+      OpSH(instruction);
+      break;
     case Instruction::PrimaryOpcode::kSW:
       OpSW(instruction);
       break;
@@ -92,6 +95,15 @@ uint32_t cpu::CPU::Load(const uint32_t address) const {
 cpu::COP0 cpu::CPU::GetCop0() const { return cop0_; }
 
 void cpu::CPU::Store(const uint32_t address, const uint32_t value) {
+  if (cop0_.IsCacheIsolated()) {
+    std::cout << "ignoring store while cache is isolated" << '\n';
+    return;
+  }
+
+  bus_.Store(address, value);
+}
+
+void cpu::CPU::Store(const uint32_t address, const uint16_t value) {
   if (cop0_.IsCacheIsolated()) {
     std::cout << "ignoring store while cache is isolated" << '\n';
     return;
@@ -255,6 +267,15 @@ void cpu::CPU::OpLW(const Instruction& instruction) {
   load_delay_slots_ = LoadDelaySlots(instruction.GetT(), value);
 }
 
+void cpu::CPU::OpSH(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t register_t = GetRegister(instruction.GetT());
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  const uint32_t address = register_s + immediate;
+  Store(address, static_cast<uint16_t>(register_t & 0xFFFF));
+}
+
 void cpu::CPU::OpSW(const Instruction& instruction) {
   const uint32_t register_s = GetRegister(instruction.GetS());
   const uint32_t register_t = GetRegister(instruction.GetT());
@@ -356,6 +377,10 @@ std::ostream& cpu::operator<<(std::ostream& outs,
       }
     case Instruction::PrimaryOpcode::kLW:
       return outs << std::format("lw R{}, {:04X}(R{})", instruction.GetT(),
+                                 instruction.GetImmediate16SignExtend(),
+                                 instruction.GetS());
+    case Instruction::PrimaryOpcode::kSH:
+      return outs << std::format("sh R{}, {:04X}(R{})", instruction.GetT(),
                                  instruction.GetImmediate16SignExtend(),
                                  instruction.GetS());
     case Instruction::PrimaryOpcode::kSW:

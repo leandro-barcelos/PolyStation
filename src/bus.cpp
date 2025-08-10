@@ -102,3 +102,23 @@ void bus::Bus::Store(uint32_t address, uint32_t value) {
           std::format("unhandled store into address: {:08X}", address));
   }
 }
+
+void bus::Bus::Store(uint32_t address, uint16_t value) {
+  if (address % 4 != 0) {
+    throw std::runtime_error(
+        std::format("unaligned store address: {:08X}", address));
+  }
+
+  const std::optional<MemoryRegion> region = GetMemoryRegionByAddress(address);
+
+  if (!region.has_value()) {
+    throw std::runtime_error(
+        std::format("unhandled store into address: {:08X}", address));
+  }
+
+  switch (region.value()) {
+    default:
+      throw std::runtime_error(
+          std::format("unhandled store into address: {:08X}", address));
+  }
+}

@@ -27,6 +27,7 @@ class Bus {
 
   [[nodiscard]] uint32_t Load(uint32_t address) const;
   void Store(uint32_t address, uint32_t value);
+  void Store(uint32_t address, uint16_t value);
 
  private:
   bios::Bios bios_;
