@@ -32,6 +32,7 @@ class Instruction {
 
   enum class SecondaryOpcode : uint8_t {
     kSLL = 0x00,
+    kADDU = 0x21,
     kOR = 0x25,
     kSLTU = 0x2B
   };
@@ -106,6 +107,7 @@ class CPU {
 
   void OpSPECIAL(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
+  void OpADDU(const Instruction& instruction);
   void OpOR(const Instruction& instruction);
   void OpSLTU(const Instruction& instruction);
   void OpJ(const Instruction& instruction);

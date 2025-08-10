@@ -105,6 +105,9 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
     case Instruction::SecondaryOpcode::kSLL:
       OpSLL(instruction);
       break;
+    case Instruction::SecondaryOpcode::kADDU:
+      OpADDU(instruction);
+      break;
     case Instruction::SecondaryOpcode::kOR:
       OpOR(instruction);
       break;
@@ -123,6 +126,14 @@ void cpu::CPU::OpSLL(const Instruction& instruction) {
   const uint16_t immediate = instruction.GetImmediate16();
 
   const uint32_t result = register_t << immediate;
+  SetRegister(instruction.GetD(), result);
+}
+
+void cpu::CPU::OpADDU(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t register_t = GetRegister(instruction.GetT());
+
+  const uint32_t result = register_s + register_t;
   SetRegister(instruction.GetD(), result);
 }
 
@@ -298,6 +309,9 @@ std::ostream& cpu::operator<<(std::ostream& outs,
           return outs << std::format("sll R{}, R{}, {:04X}", instruction.GetD(),
                                      instruction.GetT(),
                                      instruction.GetImmediate16());
+        case Instruction::SecondaryOpcode::kADDU:
+          return outs << std::format("addu R{}, R{}, R{}", instruction.GetD(),
+                                     instruction.GetS(), instruction.GetT());
         case Instruction::SecondaryOpcode::kOR:
           return outs << std::format("or R{}, R{}, R{}", instruction.GetD(),
                                      instruction.GetS(), instruction.GetT());
