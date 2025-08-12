@@ -1,7 +1,13 @@
 #include "bus.h"
 
 #include <format>
+#include <gsl/util>
 #include <iostream>
+
+uint32_t bus::MaskRegion(const uint32_t address) {
+  const uint32_t index = address >> 29;
+  return address & gsl::at(kRegionMask, index);
+}
 
 std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
     const uint32_t address) {
@@ -25,7 +31,9 @@ std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
   return std::nullopt;
 }
 
-uint32_t bus::Bus::Load(const uint32_t address) const {
+uint32_t bus::Bus::Load(uint32_t address) const {
+  address = MaskRegion(address);
+
   if (address % 4 != 0) {
     throw std::runtime_error(
         std::format("unaligned load address: {:08X}", address));
@@ -54,6 +62,8 @@ uint32_t bus::Bus::Load(const uint32_t address) const {
 }
 
 void bus::Bus::Store(uint32_t address, uint32_t value) {
+  address = MaskRegion(address);
+
   if (address % 4 != 0) {
     throw std::runtime_error(
         std::format("unaligned store address: {:08X}", address));
@@ -104,6 +114,8 @@ void bus::Bus::Store(uint32_t address, uint32_t value) {
 }
 
 void bus::Bus::Store(uint32_t address, uint16_t value) {
+  address = MaskRegion(address);
+
   if (address % 4 != 0) {
     throw std::runtime_error(
         std::format("unaligned store address: {:08X}", address));

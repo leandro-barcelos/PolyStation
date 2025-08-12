@@ -4,7 +4,7 @@
 #include <cstdint>
 
 namespace ram {
-constexpr uint32_t kRamBase = 0xA0000000;
+constexpr uint32_t kRamBase = 0x00000000;
 constexpr uint32_t kRamSize = 0x200000;
 
 class Ram {
