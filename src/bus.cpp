@@ -24,6 +24,9 @@ std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
   if (kRamSize.InRange(address)) {
     return MemoryRegion::kRamSize;
   }
+  if (kSpuControl.InRange(address)) {
+    return MemoryRegion::kSpuControl;
+  }
   if (kBios.InRange(address)) {
     return MemoryRegion::kBios;
   }
@@ -109,6 +112,9 @@ void bus::Bus::Store(uint32_t address, uint32_t value) {
       ram_.Store(offset, value);
       break;
     }
+    case MemoryRegion::kSpuControl:
+      std::cout << "unhandled write to SPU control registers" << '\n';
+      break;
     default:
       throw std::runtime_error(
           std::format("unhandled store into address: {:08X}", address));
@@ -131,6 +137,9 @@ void bus::Bus::Store(uint32_t address, uint16_t value) {
   }
 
   switch (region.value()) {
+    case MemoryRegion::kSpuControl:
+      std::cout << "unhandled write to SPU control registers" << '\n';
+      break;
     default:
       throw std::runtime_error(
           std::format("unhandled store into address: {:08X}", address));

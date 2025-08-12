@@ -18,6 +18,7 @@ constexpr MemoryRange kRam = {.base = 0x00000000, .size = 0x200000};
 constexpr MemoryRange kMemoryControl{.base = 0x1F801000, .size = 0x24};
 constexpr MemoryRange kRamSize{.base = 0x1F801060, .size = 0x4};
 constexpr MemoryRange kCacheControl{.base = 0xFFFE0130, .size = 0x4};
+constexpr MemoryRange kSpuControl{.base = 0x1F801D80, .size = 0x40};
 
 constexpr std::array<uint32_t, 8> kRegionMask{
     0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
@@ -29,7 +30,8 @@ enum class MemoryRegion : uint8_t {
   kMemoryControl,
   kRamSize,
   kCacheControl,
-  kRam
+  kRam,
+  kSpuControl
 };
 
 uint32_t MaskRegion(uint32_t address);
