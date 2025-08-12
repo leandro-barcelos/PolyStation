@@ -118,7 +118,7 @@ void bus::Bus::Store(uint32_t address, uint32_t value) {
 void bus::Bus::Store(uint32_t address, uint16_t value) {
   address = MaskRegion(address);
 
-  if (address % 4 != 0) {
+  if (address % 2 != 0) {
     throw std::runtime_error(
         std::format("unaligned store address: {:08X}", address));
   }
