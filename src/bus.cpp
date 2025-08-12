@@ -4,6 +4,10 @@
 #include <gsl/util>
 #include <iostream>
 
+bool bus::MemoryRange::InRange(const uint32_t address) const {
+  return address >= base && address < base + size;
+}
+
 uint32_t bus::MaskRegion(const uint32_t address) {
   const uint32_t index = address >> 29;
   return address & gsl::at(kRegionMask, index);
@@ -11,21 +15,19 @@ uint32_t bus::MaskRegion(const uint32_t address) {
 
 std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
     const uint32_t address) {
-  if (address >= ram::kRamBase && address < ram::kRamBase + ram::kRamSize) {
+  if (kRam.InRange(address)) {
     return MemoryRegion::kRam;
   }
-  if (address >= kMemoryControlBase &&
-      address < kMemoryControlBase + kMemoryControlSize) {
+  if (kMemoryControl.InRange(address)) {
     return MemoryRegion::kMemoryControl;
   }
-  if (address == kRamSizeBase) {
+  if (kRamSize.InRange(address)) {
     return MemoryRegion::kRamSize;
   }
-  if (address >= bios::kBiosBase &&
-      address < bios::kBiosBase + bios::kBiosSize) {
+  if (kBios.InRange(address)) {
     return MemoryRegion::kBios;
   }
-  if (address == kCacheControlBase) {
+  if (kCacheControl.InRange(address)) {
     return MemoryRegion::kCacheControl;
   }
   return std::nullopt;
@@ -47,11 +49,11 @@ uint32_t bus::Bus::Load(uint32_t address) const {
 
   switch (region.value()) {
     case MemoryRegion::kBios: {
-      const uint32_t offset = address - bios::kBiosBase;
+      const uint32_t offset = address - kBios.base;
       return bios_.Load(offset);
     }
     case MemoryRegion::kRam: {
-      const uint32_t offset = address - ram::kRamBase;
+      const uint32_t offset = address - kRam.base;
       return ram_.Load(offset);
     }
     default:
@@ -78,7 +80,7 @@ void bus::Bus::Store(uint32_t address, uint32_t value) {
 
   switch (region.value()) {
     case MemoryRegion::kMemoryControl:
-      switch (address - kMemoryControlBase) {
+      switch (address - kMemoryControl.base) {
         case 0:
           if (value != 0x1f000000) {
             throw std::runtime_error(std::format(
@@ -103,7 +105,7 @@ void bus::Bus::Store(uint32_t address, uint32_t value) {
       std::cout << "unhandled write to Cache Control register" << '\n';
       break;
     case MemoryRegion::kRam: {
-      const uint32_t offset = address - ram::kRamBase;
+      const uint32_t offset = address - kRam.base;
       ram_.Store(offset, value);
       break;
     }

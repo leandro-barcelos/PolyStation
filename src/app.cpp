@@ -519,7 +519,7 @@ void app::Application::DrawControlWindow() {
 
     if (ImGui::Button("Reset", ImVec2(available_width, 0.0)) && !running_) {
       cpu_.Reset();
-      target_pc_ = bios::kBiosBase;
+      target_pc_ = bus::kBios.base;
     }
   }
   ImGui::End();
@@ -534,17 +534,17 @@ void app::Application::DrawCpuDisassembler() const {
 
   uint32_t start_pc = current_pc;
   if (constexpr uint32_t kInstructionsBefore = 5;
-      current_pc >= bios::kBiosBase + (kInstructionsBefore * 4)) {
+      current_pc >= bus::kBios.base + (kInstructionsBefore * 4)) {
     start_pc = current_pc - (kInstructionsBefore * 4);
   } else {
-    start_pc = bios::kBiosBase;
+    start_pc = bus::kBios.base;
   }
 
   start_pc = (start_pc / 4) * 4;
 
   for (uint32_t pc = start_pc; pc < start_pc + (kMaxInstructions * 4);
        pc += 4) {
-    if (pc < bios::kBiosBase || pc >= bios::kBiosBase + bios::kBiosSize) {
+    if (pc < bus::kBios.base || pc >= bus::kBios.base + bios::kBiosSize) {
       continue;
     }
 

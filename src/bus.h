@@ -6,10 +6,18 @@
 #include "ram.h"
 
 namespace bus {
-constexpr uint32_t kMemoryControlBase = 0x1F801000;
-constexpr uint32_t kMemoryControlSize = 0x24;
-constexpr uint32_t kRamSizeBase = 0x1F801060;
-constexpr uint32_t kCacheControlBase = 0xFFFE0130;
+struct MemoryRange {
+  uint32_t base;
+  uint32_t size;
+
+  [[nodiscard]] bool InRange(uint32_t address) const;
+} __attribute__((aligned(8)));
+
+constexpr MemoryRange kBios = {.base = 0x1FC00000, .size = 0x80000};
+constexpr MemoryRange kRam = {.base = 0x00000000, .size = 0x200000};
+constexpr MemoryRange kMemoryControl{.base = 0x1F801000, .size = 0x24};
+constexpr MemoryRange kRamSize{.base = 0x1F801060, .size = 0x4};
+constexpr MemoryRange kCacheControl{.base = 0xFFFE0130, .size = 0x4};
 
 constexpr std::array<uint32_t, 8> kRegionMask{
     0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,

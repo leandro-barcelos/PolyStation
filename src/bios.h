@@ -4,7 +4,6 @@
 #include <vector>
 
 namespace bios {
-constexpr uint32_t kBiosBase = 0x1FC00000;
 constexpr uint32_t kBiosSize = 0x80000;
 
 class Bios {

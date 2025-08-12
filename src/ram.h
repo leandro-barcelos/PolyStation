@@ -4,9 +4,6 @@
 #include <cstdint>
 
 namespace ram {
-constexpr uint32_t kRamBase = 0x00000000;
-constexpr uint32_t kRamSize = 0x200000;
-
 class Ram {
  public:
   [[nodiscard]] uint32_t Load(uint32_t offset) const;
