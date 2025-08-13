@@ -44,6 +44,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kADDIU:
       OpADDIU(instruction);
       break;
+    case Instruction::PrimaryOpcode::kANDI:
+      OpANDI(instruction);
+      break;
     case Instruction::PrimaryOpcode::kORI:
       OpORI(instruction);
       break;
@@ -211,6 +214,14 @@ void cpu::CPU::OpADDIU(const Instruction& instruction) {
   SetRegister(instruction.GetT(), result);
 }
 
+void cpu::CPU::OpANDI(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t immediate = instruction.GetImmediate16();
+
+  const uint32_t result = register_s & immediate;
+  SetRegister(instruction.GetT(), result);
+}
+
 void cpu::CPU::OpORI(const Instruction& instruction) {
   const uint32_t register_s = GetRegister(instruction.GetS());
   const uint16_t immediate = instruction.GetImmediate16();
@@ -366,6 +377,10 @@ std::ostream& cpu::operator<<(std::ostream& outs,
                  static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
     case Instruction::PrimaryOpcode::kADDIU:
       return outs << std::format("addiu R{}, R{}, {:04X}", instruction.GetT(),
+                                 instruction.GetS(),
+                                 instruction.GetImmediate16());
+    case Instruction::PrimaryOpcode::kANDI:
+      return outs << std::format("andi R{}, R{}, {:04X}", instruction.GetT(),
                                  instruction.GetS(),
                                  instruction.GetImmediate16());
     case Instruction::PrimaryOpcode::kORI:

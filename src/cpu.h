@@ -24,6 +24,7 @@ class Instruction {
     kBNE = 0x05,
     kADDI = 0x08,
     kADDIU = 0x09,
+    kANDI = 0x0C,
     kORI = 0x0D,
     kLUI = 0x0F,
     kCOP0 = 0x10,
@@ -119,6 +120,7 @@ class CPU {
   void OpBNE(const Instruction& instruction);
   void OpADDI(const Instruction& instruction);
   void OpADDIU(const Instruction& instruction);
+  void OpANDI(const Instruction& instruction);
   void OpORI(const Instruction& instruction);
   void OpLUI(const Instruction& instruction);
   void OpCOP0(const Instruction& instruction);
