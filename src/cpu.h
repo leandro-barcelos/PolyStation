@@ -8,6 +8,7 @@
 namespace cpu {
 constexpr uint32_t kNumberOfRegisters = 32;
 constexpr uint32_t kInstructionLength = 4;
+constexpr uint32_t kReturnAddress = 31;
 
 class Instruction {
  public:
@@ -19,6 +20,7 @@ class Instruction {
   enum class PrimaryOpcode : uint8_t {
     kSPECIAL = 0x00,
     kJ = 0x02,
+    kJAL = 0x03,
     kBNE = 0x05,
     kADDI = 0x08,
     kADDIU = 0x09,
@@ -113,6 +115,7 @@ class CPU {
   void OpOR(const Instruction& instruction);
   void OpSLTU(const Instruction& instruction);
   void OpJ(const Instruction& instruction);
+  void OpJAL(const Instruction& instruction);
   void OpBNE(const Instruction& instruction);
   void OpADDI(const Instruction& instruction);
   void OpADDIU(const Instruction& instruction);

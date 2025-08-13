@@ -32,6 +32,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kJ:
       OpJ(instruction);
       break;
+    case Instruction::PrimaryOpcode::kJAL:
+      OpJAL(instruction);
+      break;
     case Instruction::PrimaryOpcode::kBNE:
       OpBNE(instruction);
       break;
@@ -168,6 +171,12 @@ void cpu::CPU::OpJ(const Instruction& instruction) {
   const uint32_t immediate = instruction.GetImmediate26();
 
   program_counter_ = (program_counter_ & 0xF0000000) | (immediate << 2U);
+}
+
+void cpu::CPU::OpJAL(const Instruction& instruction) {
+  SetRegister(kReturnAddress, GetPC());
+
+  OpJ(instruction);
 }
 
 void cpu::CPU::OpBNE(const Instruction& instruction) {
@@ -345,6 +354,8 @@ std::ostream& cpu::operator<<(std::ostream& outs,
       }
     case Instruction::PrimaryOpcode::kJ:
       return outs << std::format("j {:07X}", instruction.GetImmediate26());
+    case Instruction::PrimaryOpcode::kJAL:
+      return outs << std::format("jal {:07X}", instruction.GetImmediate26());
     case Instruction::PrimaryOpcode::kBNE:
       return outs << std::format(
                  "bne R{}, R{}, {}", instruction.GetS(), instruction.GetT(),
