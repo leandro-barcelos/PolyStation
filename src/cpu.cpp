@@ -59,6 +59,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kLW:
       OpLW(instruction);
       break;
+    case Instruction::PrimaryOpcode::kSB:
+      OpSB(instruction);
+      break;
     case Instruction::PrimaryOpcode::kSH:
       OpSH(instruction);
       break;
@@ -110,6 +113,15 @@ void cpu::CPU::Store(const uint32_t address, const uint32_t value) {
 }
 
 void cpu::CPU::Store(const uint32_t address, const uint16_t value) {
+  if (cop0_.IsCacheIsolated()) {
+    std::cout << "ignoring store while cache is isolated" << '\n';
+    return;
+  }
+
+  bus_.Store(address, value);
+}
+
+void cpu::CPU::Store(const uint32_t address, const uint8_t value) {
   if (cop0_.IsCacheIsolated()) {
     std::cout << "ignoring store while cache is isolated" << '\n';
     return;
@@ -287,6 +299,15 @@ void cpu::CPU::OpLW(const Instruction& instruction) {
   load_delay_slots_ = LoadDelaySlots(instruction.GetT(), value);
 }
 
+void cpu::CPU::OpSB(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t register_t = GetRegister(instruction.GetT());
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  const uint32_t address = register_s + immediate;
+  Store(address, static_cast<uint8_t>(register_t & 0xFF));
+}
+
 void cpu::CPU::OpSH(const Instruction& instruction) {
   const uint32_t register_s = GetRegister(instruction.GetS());
   const uint32_t register_t = GetRegister(instruction.GetT());
@@ -403,6 +424,10 @@ std::ostream& cpu::operator<<(std::ostream& outs,
       }
     case Instruction::PrimaryOpcode::kLW:
       return outs << std::format("lw R{}, {:04X}(R{})", instruction.GetT(),
+                                 instruction.GetImmediate16SignExtend(),
+                                 instruction.GetS());
+    case Instruction::PrimaryOpcode::kSB:
+      return outs << std::format("sb R{}, {:04X}(R{})", instruction.GetT(),
                                  instruction.GetImmediate16SignExtend(),
                                  instruction.GetS());
     case Instruction::PrimaryOpcode::kSH:

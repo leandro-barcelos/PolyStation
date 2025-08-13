@@ -33,6 +33,9 @@ std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
   if (kCacheControl.InRange(address)) {
     return MemoryRegion::kCacheControl;
   }
+  if (kExpansionRegion2IntDipPost.InRange(address)) {
+    return MemoryRegion::kExpansionRegion2IntDipPost;
+  }
   return std::nullopt;
 }
 
@@ -139,6 +142,27 @@ void bus::Bus::Store(uint32_t address, uint16_t value) {
   switch (region.value()) {
     case MemoryRegion::kSpuControl:
       std::cout << "unhandled write to SPU control registers" << '\n';
+      break;
+    default:
+      throw std::runtime_error(
+          std::format("unhandled store into address: {:08X}", address));
+  }
+}
+
+void bus::Bus::Store(uint32_t address, uint8_t value) {
+  address = MaskRegion(address);
+
+  const std::optional<MemoryRegion> region = GetMemoryRegionByAddress(address);
+
+  if (!region.has_value()) {
+    throw std::runtime_error(
+        std::format("unhandled store into address: {:08X}", address));
+  }
+
+  switch (region.value()) {
+    case MemoryRegion::kExpansionRegion2IntDipPost:
+      std::cout << "unhandled write to Expansion Region 2 (Int/Dip/Post)"
+                << '\n';
       break;
     default:
       throw std::runtime_error(

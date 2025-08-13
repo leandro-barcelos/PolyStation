@@ -19,6 +19,8 @@ constexpr MemoryRange kMemoryControl{.base = 0x1F801000, .size = 0x24};
 constexpr MemoryRange kRamSize{.base = 0x1F801060, .size = 0x4};
 constexpr MemoryRange kCacheControl{.base = 0xFFFE0130, .size = 0x4};
 constexpr MemoryRange kSpuControl{.base = 0x1F801D80, .size = 0x40};
+constexpr MemoryRange kExpansionRegion2IntDipPost{.base = 0x1F802000,
+                                                  .size = 0x71};
 
 constexpr std::array<uint32_t, 8> kRegionMask{
     0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
@@ -31,7 +33,8 @@ enum class MemoryRegion : uint8_t {
   kRamSize,
   kCacheControl,
   kRam,
-  kSpuControl
+  kSpuControl,
+  kExpansionRegion2IntDipPost
 };
 
 uint32_t MaskRegion(uint32_t address);
@@ -45,6 +48,7 @@ class Bus {
   [[nodiscard]] uint32_t Load(uint32_t address) const;
   void Store(uint32_t address, uint32_t value);
   void Store(uint32_t address, uint16_t value);
+  void Store(uint32_t address, uint8_t value);
 
  private:
   bios::Bios bios_;

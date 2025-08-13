@@ -29,6 +29,7 @@ class Instruction {
     kLUI = 0x0F,
     kCOP0 = 0x10,
     kLW = 0x23,
+    kSB = 0x28,
     kSH = 0x29,
     kSW = 0x2B,
     kNOP = 0xFF
@@ -109,6 +110,7 @@ class CPU {
 
   void Store(uint32_t address, uint32_t value);
   void Store(uint32_t address, uint16_t value);
+  void Store(uint32_t address, uint8_t value);
 
   void OpSPECIAL(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
@@ -126,6 +128,7 @@ class CPU {
   void OpCOP0(const Instruction& instruction);
   void OpMTC0(const Instruction& instruction);
   void OpLW(const Instruction& instruction);
+  void OpSB(const Instruction& instruction);
   void OpSH(const Instruction& instruction);
   void OpSW(const Instruction& instruction);
 };
