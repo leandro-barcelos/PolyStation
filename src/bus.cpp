@@ -50,7 +50,8 @@ uint32_t bus::Bus::Load32(uint32_t address) const {
   const std::optional<MemoryRegion> region = GetMemoryRegionByAddress(address);
 
   if (!region.has_value()) {
-    throw std::runtime_error("failed to access an unmapped memory region!");
+    throw std::runtime_error(
+        std::format("unhandled store into address: {:08X}", address));
   }
 
   switch (region.value()) {
@@ -74,7 +75,8 @@ uint8_t bus::Bus::Load8(uint32_t address) const {
   const std::optional<MemoryRegion> region = GetMemoryRegionByAddress(address);
 
   if (!region.has_value()) {
-    throw std::runtime_error("failed to access an unmapped memory region!");
+    throw std::runtime_error(
+        std::format("unhandled store into address: {:08X}", address));
   }
 
   switch (region.value()) {
