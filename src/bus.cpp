@@ -39,7 +39,7 @@ std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
   return std::nullopt;
 }
 
-uint32_t bus::Bus::Load(uint32_t address) const {
+uint32_t bus::Bus::Load32(uint32_t address) const {
   address = MaskRegion(address);
 
   if (address % 4 != 0) {
@@ -56,11 +56,11 @@ uint32_t bus::Bus::Load(uint32_t address) const {
   switch (region.value()) {
     case MemoryRegion::kBios: {
       const uint32_t offset = address - kBios.base;
-      return bios_.Load(offset);
+      return bios_.Load32(offset);
     }
     case MemoryRegion::kRam: {
       const uint32_t offset = address - kRam.base;
-      return ram_.Load(offset);
+      return ram_.Load32(offset);
     }
     default:
       break;
@@ -69,7 +69,7 @@ uint32_t bus::Bus::Load(uint32_t address) const {
   throw std::runtime_error("failed to Load memory address!");
 }
 
-void bus::Bus::Store(uint32_t address, uint32_t value) {
+void bus::Bus::Store32(uint32_t address, uint32_t value) {
   address = MaskRegion(address);
 
   if (address % 4 != 0) {
@@ -112,7 +112,7 @@ void bus::Bus::Store(uint32_t address, uint32_t value) {
       break;
     case MemoryRegion::kRam: {
       const uint32_t offset = address - kRam.base;
-      ram_.Store(offset, value);
+      ram_.Store32(offset, value);
       break;
     }
     case MemoryRegion::kSpuControl:
@@ -124,7 +124,7 @@ void bus::Bus::Store(uint32_t address, uint32_t value) {
   }
 }
 
-void bus::Bus::Store(uint32_t address, uint16_t value) {
+void bus::Bus::Store16(uint32_t address, uint16_t value) {
   address = MaskRegion(address);
 
   if (address % 2 != 0) {
@@ -149,7 +149,7 @@ void bus::Bus::Store(uint32_t address, uint16_t value) {
   }
 }
 
-void bus::Bus::Store(uint32_t address, uint8_t value) {
+void bus::Bus::Store8(uint32_t address, uint8_t value) {
   address = MaskRegion(address);
 
   const std::optional<MemoryRegion> region = GetMemoryRegionByAddress(address);

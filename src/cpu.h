@@ -95,8 +95,9 @@ class CPU {
   [[nodiscard]] unsigned long long GetStepCount() const;
   [[nodiscard]] uint32_t GetPC() const;
   [[nodiscard]] uint32_t GetPrevPC() const;
-  [[nodiscard]] uint32_t Load(uint32_t address) const;
   [[nodiscard]] COP0 GetCop0() const;
+
+  [[nodiscard]] uint32_t Load32(uint32_t address) const;
 
  private:
   uint32_t program_counter_ = bus::kBios.base;
@@ -109,9 +110,9 @@ class CPU {
   COP0 cop0_;
   unsigned long long step_count_ = 0;
 
-  void Store(uint32_t address, uint32_t value);
-  void Store(uint32_t address, uint16_t value);
-  void Store(uint32_t address, uint8_t value);
+  void Store32(uint32_t address, uint32_t value);
+  void Store16(uint32_t address, uint16_t value);
+  void Store8(uint32_t address, uint8_t value);
 
   void OpSPECIAL(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);

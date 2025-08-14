@@ -9,7 +9,7 @@ bios::Bios::Bios(const std::string& path) {
   input.close();
 }
 
-uint32_t bios::Bios::Load(const uint32_t offset) const {
+uint32_t bios::Bios::Load32(const uint32_t offset) const {
   const auto byte_0 = std::to_integer<uint32_t>(data_[offset + 0]);
   const auto byte_1 = std::to_integer<uint32_t>(data_[offset + 1]);
   const auto byte_2 = std::to_integer<uint32_t>(data_[offset + 2]);

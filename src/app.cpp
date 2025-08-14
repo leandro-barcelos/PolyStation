@@ -548,7 +548,7 @@ void app::Application::DrawCpuDisassembler() const {
       continue;
     }
 
-    const uint32_t instruction_data = cpu_.Load(pc);
+    const uint32_t instruction_data = cpu_.Load32(pc);
     const cpu::Instruction instruction(instruction_data);
 
     if (pc == current_pc) {

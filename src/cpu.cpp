@@ -17,7 +17,7 @@ void cpu::CPU::Reset() {
 
 void cpu::CPU::Cycle() {
   const Instruction instruction = next_instruction_;
-  next_instruction_ = Instruction(Load(program_counter_));
+  next_instruction_ = Instruction(Load32(program_counter_));
   prev_program_counter_ = program_counter_;
   program_counter_ += kInstructionLength;
 
@@ -97,37 +97,37 @@ uint32_t cpu::CPU::GetPC() const { return program_counter_; }
 
 uint32_t cpu::CPU::GetPrevPC() const { return prev_program_counter_; }
 
-uint32_t cpu::CPU::Load(const uint32_t address) const {
-  return bus_.Load(address);
-}
-
 cpu::COP0 cpu::CPU::GetCop0() const { return cop0_; }
 
-void cpu::CPU::Store(const uint32_t address, const uint32_t value) {
-  if (cop0_.IsCacheIsolated()) {
-    std::cout << "ignoring store while cache is isolated" << '\n';
-    return;
-  }
-
-  bus_.Store(address, value);
+uint32_t cpu::CPU::Load32(const uint32_t address) const {
+  return bus_.Load32(address);
 }
 
-void cpu::CPU::Store(const uint32_t address, const uint16_t value) {
+void cpu::CPU::Store32(const uint32_t address, const uint32_t value) {
   if (cop0_.IsCacheIsolated()) {
     std::cout << "ignoring store while cache is isolated" << '\n';
     return;
   }
 
-  bus_.Store(address, value);
+  bus_.Store32(address, value);
 }
 
-void cpu::CPU::Store(const uint32_t address, const uint8_t value) {
+void cpu::CPU::Store16(const uint32_t address, const uint16_t value) {
   if (cop0_.IsCacheIsolated()) {
     std::cout << "ignoring store while cache is isolated" << '\n';
     return;
   }
 
-  bus_.Store(address, value);
+  bus_.Store16(address, value);
+}
+
+void cpu::CPU::Store8(const uint32_t address, const uint8_t value) {
+  if (cop0_.IsCacheIsolated()) {
+    std::cout << "ignoring store while cache is isolated" << '\n';
+    return;
+  }
+
+  bus_.Store8(address, value);
 }
 
 void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
@@ -303,7 +303,7 @@ void cpu::CPU::OpLW(const Instruction& instruction) {
   const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   const uint32_t address = register_s + immediate;
-  const uint32_t value = bus_.Load(address);
+  const uint32_t value = bus_.Load32(address);
 
   load_delay_slots_ = LoadDelaySlots(instruction.GetT(), value);
 }
@@ -314,7 +314,7 @@ void cpu::CPU::OpSB(const Instruction& instruction) {
   const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   const uint32_t address = register_s + immediate;
-  Store(address, static_cast<uint8_t>(register_t & 0xFF));
+  Store8(address, static_cast<uint8_t>(register_t & 0xFF));
 }
 
 void cpu::CPU::OpSH(const Instruction& instruction) {
@@ -323,7 +323,7 @@ void cpu::CPU::OpSH(const Instruction& instruction) {
   const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   const uint32_t address = register_s + immediate;
-  Store(address, static_cast<uint16_t>(register_t & 0xFFFF));
+  Store16(address, static_cast<uint16_t>(register_t & 0xFFFF));
 }
 
 void cpu::CPU::OpSW(const Instruction& instruction) {
@@ -332,7 +332,7 @@ void cpu::CPU::OpSW(const Instruction& instruction) {
   const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   const uint32_t address = register_s + immediate;
-  Store(address, register_t);
+  Store32(address, register_t);
 }
 
 cpu::Instruction::PrimaryOpcode cpu::Instruction::GetPrimaryOpcode() const {
