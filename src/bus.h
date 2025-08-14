@@ -21,6 +21,7 @@ constexpr MemoryRange kCacheControl{.base = 0xFFFE0130, .size = 0x4};
 constexpr MemoryRange kSpuControl{.base = 0x1F801D80, .size = 0x40};
 constexpr MemoryRange kExpansionRegion2IntDipPost{.base = 0x1F802000,
                                                   .size = 0x71};
+constexpr MemoryRange kExpansion1{.base = 0x1F000000, .size = 0xB0};
 
 constexpr std::array<uint32_t, 8> kRegionMask{
     0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
@@ -34,7 +35,8 @@ enum class MemoryRegion : uint8_t {
   kCacheControl,
   kRam,
   kSpuControl,
-  kExpansionRegion2IntDipPost
+  kExpansionRegion2IntDipPost,
+  kExpansion1
 };
 
 uint32_t MaskRegion(uint32_t address);

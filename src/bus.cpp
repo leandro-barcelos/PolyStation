@@ -36,6 +36,9 @@ std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
   if (kExpansionRegion2IntDipPost.InRange(address)) {
     return MemoryRegion::kExpansionRegion2IntDipPost;
   }
+  if (kExpansion1.InRange(address)) {
+    return MemoryRegion::kExpansion1;
+  }
   return std::nullopt;
 }
 
@@ -76,7 +79,7 @@ uint8_t bus::Bus::Load8(uint32_t address) const {
 
   if (!region.has_value()) {
     throw std::runtime_error(
-        std::format("unhandled store into address: {:08X}", address));
+        std::format("unhandled load in address: {:08X}", address));
   }
 
   switch (region.value()) {
@@ -84,6 +87,8 @@ uint8_t bus::Bus::Load8(uint32_t address) const {
       const uint32_t offset = address - kBios.base;
       return bios_.Load8(offset);
     }
+    case MemoryRegion::kExpansion1:
+      return 0xFF;
     default:
       throw std::runtime_error(
           std::format("unhandled load in address: {:08X}", address));
