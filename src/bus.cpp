@@ -63,10 +63,29 @@ uint32_t bus::Bus::Load32(uint32_t address) const {
       return ram_.Load32(offset);
     }
     default:
-      break;
+      throw std::runtime_error(
+          std::format("unhandled load in address: {:08X}", address));
+  }
+}
+
+uint8_t bus::Bus::Load8(uint32_t address) const {
+  address = MaskRegion(address);
+
+  const std::optional<MemoryRegion> region = GetMemoryRegionByAddress(address);
+
+  if (!region.has_value()) {
+    throw std::runtime_error("failed to access an unmapped memory region!");
   }
 
-  throw std::runtime_error("failed to Load memory address!");
+  switch (region.value()) {
+    case MemoryRegion::kBios: {
+      const uint32_t offset = address - kBios.base;
+      return bios_.Load8(offset);
+    }
+    default:
+      throw std::runtime_error(
+          std::format("unhandled load in address: {:08X}", address));
+  }
 }
 
 void bus::Bus::Store32(uint32_t address, uint32_t value) {

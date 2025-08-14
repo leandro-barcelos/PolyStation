@@ -11,6 +11,7 @@ class Bios {
   explicit Bios(const std::string& path);
 
   [[nodiscard]] uint32_t Load32(uint32_t offset) const;
+  [[nodiscard]] uint8_t Load8(uint32_t offset) const;
 
  private:
   std::vector<std::byte> data_;

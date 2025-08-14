@@ -28,6 +28,7 @@ class Instruction {
     kORI = 0x0D,
     kLUI = 0x0F,
     kCOP0 = 0x10,
+    kLB = 0x20,
     kLW = 0x23,
     kSB = 0x28,
     kSH = 0x29,
@@ -110,6 +111,8 @@ class CPU {
   COP0 cop0_;
   unsigned long long step_count_ = 0;
 
+  [[nodiscard]] uint8_t Load8(uint32_t address) const;
+
   void Store32(uint32_t address, uint32_t value);
   void Store16(uint32_t address, uint16_t value);
   void Store8(uint32_t address, uint8_t value);
@@ -130,6 +133,7 @@ class CPU {
   void OpLUI(const Instruction& instruction);
   void OpCOP0(const Instruction& instruction);
   void OpMTC0(const Instruction& instruction);
+  void OpLB(const Instruction& instruction);
   void OpLW(const Instruction& instruction);
   void OpSB(const Instruction& instruction);
   void OpSH(const Instruction& instruction);

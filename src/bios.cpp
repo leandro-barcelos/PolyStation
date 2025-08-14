@@ -17,3 +17,7 @@ uint32_t bios::Bios::Load32(const uint32_t offset) const {
 
   return byte_0 | byte_1 << 8U | byte_2 << 16U | byte_3 << 24U;
 }
+
+uint8_t bios::Bios::Load8(const uint32_t offset) const {
+  return std::to_integer<uint8_t>(data_[offset]);
+}

@@ -56,6 +56,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kCOP0:
       OpCOP0(instruction);
       break;
+    case Instruction::PrimaryOpcode::kLB:
+      OpLB(instruction);
+      break;
     case Instruction::PrimaryOpcode::kLW:
       OpLW(instruction);
       break;
@@ -101,6 +104,10 @@ cpu::COP0 cpu::CPU::GetCop0() const { return cop0_; }
 
 uint32_t cpu::CPU::Load32(const uint32_t address) const {
   return bus_.Load32(address);
+}
+
+uint8_t cpu::CPU::Load8(const uint32_t address) const {
+  return bus_.Load8(address);
 }
 
 void cpu::CPU::Store32(const uint32_t address, const uint32_t value) {
@@ -293,6 +300,21 @@ void cpu::CPU::OpMTC0(const Instruction& instruction) {
   }
 }
 
+void cpu::CPU::OpLB(const Instruction& instruction) {
+  if (cop0_.IsCacheIsolated()) {
+    std::cout << "ignoring load while cache is isolated" << '\n';
+    return;
+  }
+
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  const uint32_t address = register_s + immediate;
+  const uint8_t value = bus_.Load32(address);
+
+  load_delay_slots_ = LoadDelaySlots(instruction.GetT(), value);
+}
+
 void cpu::CPU::OpLW(const Instruction& instruction) {
   if (cop0_.IsCacheIsolated()) {
     std::cout << "ignoring load while cache is isolated" << '\n';
@@ -433,6 +455,10 @@ std::ostream& cpu::operator<<(std::ostream& outs,
         default:
           return outs << std::format("0x{:08X}", instruction.GetRawData());
       }
+    case Instruction::PrimaryOpcode::kLB:
+      return outs << std::format("lb R{}, {:04X}(R{})", instruction.GetT(),
+                                 instruction.GetImmediate16SignExtend(),
+                                 instruction.GetS());
     case Instruction::PrimaryOpcode::kLW:
       return outs << std::format("lw R{}, {:04X}(R{})", instruction.GetT(),
                                  instruction.GetImmediate16SignExtend(),
