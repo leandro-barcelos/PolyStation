@@ -21,6 +21,7 @@ class Instruction {
     kSPECIAL = 0x00,
     kJ = 0x02,
     kJAL = 0x03,
+    kBEQ = 0x04,
     kBNE = 0x05,
     kADDI = 0x08,
     kADDIU = 0x09,
@@ -125,6 +126,7 @@ class CPU {
   void OpSLTU(const Instruction& instruction);
   void OpJ(const Instruction& instruction);
   void OpJAL(const Instruction& instruction);
+  void OpBEQ(const Instruction& instruction);
   void OpBNE(const Instruction& instruction);
   void OpADDI(const Instruction& instruction);
   void OpADDIU(const Instruction& instruction);
