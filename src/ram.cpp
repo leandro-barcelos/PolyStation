@@ -12,6 +12,10 @@ uint32_t ram::Ram::Load32(const uint32_t offset) const {
   return byte_0 | byte_1 << 8U | byte_2 << 16U | byte_3 << 24U;
 }
 
+uint8_t ram::Ram::Load8(const uint32_t offset) const {
+  return std::to_integer<uint32_t>(data_[offset]);
+}
+
 void ram::Ram::Store32(const uint32_t offset, const uint32_t value) {
   const unsigned char byte_0 = value & 0xFF;
   const unsigned char byte_1 = (value >> 8U) & 0xFF;
@@ -22,4 +26,8 @@ void ram::Ram::Store32(const uint32_t offset, const uint32_t value) {
   gsl::at(data_, offset + 1) = static_cast<std::byte>(byte_1);
   gsl::at(data_, offset + 2) = static_cast<std::byte>(byte_2);
   gsl::at(data_, offset + 3) = static_cast<std::byte>(byte_3);
+}
+
+void ram::Ram::Store8(const uint32_t offset, const uint8_t value) {
+  gsl::at(data_, offset) = static_cast<std::byte>(value);
 }

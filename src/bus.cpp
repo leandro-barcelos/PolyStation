@@ -89,6 +89,10 @@ uint8_t bus::Bus::Load8(uint32_t address) const {
     }
     case MemoryRegion::kExpansion1:
       return 0xFF;
+    case MemoryRegion::kRam: {
+      const uint32_t offset = address - kRam.base;
+      return ram_.Load8(offset);
+    }
     default:
       throw std::runtime_error(
           std::format("unhandled load in address: {:08X}", address));
@@ -190,6 +194,11 @@ void bus::Bus::Store8(uint32_t address, uint8_t value) {
       std::cout << "unhandled write to Expansion Region 2 (Int/Dip/Post)"
                 << '\n';
       break;
+    case MemoryRegion::kRam: {
+      const uint32_t offset = address - kRam.base;
+      ram_.Store8(offset, value);
+      break;
+    }
     default:
       throw std::runtime_error(
           std::format("unhandled store into address: {:08X}", address));

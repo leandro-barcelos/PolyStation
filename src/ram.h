@@ -7,8 +7,10 @@ namespace ram {
 class Ram {
  public:
   [[nodiscard]] uint32_t Load32(uint32_t offset) const;
+  [[nodiscard]] uint8_t Load8(uint32_t offset) const;
 
   void Store32(uint32_t offset, uint32_t value);
+  void Store8(uint32_t offset, uint8_t value);
 
  private:
   std::array<std::byte, 0x200000> data_{};
