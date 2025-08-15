@@ -45,7 +45,7 @@ class Instruction {
     kSLTU = 0x2B
   };
 
-  enum class CoprocessorOpcode : uint8_t { kMTC = 0x04 };
+  enum class CoprocessorOpcode : uint8_t { kMFC = 0x00, kMTC = 0x04 };
 
   [[nodiscard]] uint32_t GetRawData() const { return data_; }
   [[nodiscard]] PrimaryOpcode GetPrimaryOpcode() const;
@@ -134,6 +134,7 @@ class CPU {
   void OpORI(const Instruction& instruction);
   void OpLUI(const Instruction& instruction);
   void OpCOP0(const Instruction& instruction);
+  void OpMFC0(const Instruction& instruction);
   void OpMTC0(const Instruction& instruction);
   void OpLB(const Instruction& instruction);
   void OpLW(const Instruction& instruction);

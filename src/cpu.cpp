@@ -282,6 +282,9 @@ void cpu::CPU::OpLUI(const Instruction& instruction) {
 void cpu::CPU::OpCOP0(const Instruction& instruction) {
   switch (const bool flag = instruction.GetCoprocessorFlag();
           instruction.GetCoprocessorOpcode(flag)) {
+    case Instruction::CoprocessorOpcode::kMFC:
+      OpMFC0(instruction);
+      break;
     case Instruction::CoprocessorOpcode::kMTC:
       OpMTC0(instruction);
       break;
@@ -289,6 +292,17 @@ void cpu::CPU::OpCOP0(const Instruction& instruction) {
       throw std::runtime_error(std::format(
           "unhandled coprocessor opcode {:02X}",
           static_cast<uint8_t>(instruction.GetCoprocessorOpcode(flag))));
+  }
+}
+
+void cpu::CPU::OpMFC0(const Instruction& instruction) {
+  switch (instruction.GetD()) {
+    case COP0::Registers::kStatusRegister:
+      SetRegister(instruction.GetT(), cop0_.status_register);
+      break;
+    default:
+      throw std::runtime_error(
+          std::format("unhandled cop0 register {}", instruction.GetD()));
   }
 }
 
@@ -465,6 +479,11 @@ std::ostream& cpu::operator<<(std::ostream& outs,
     case Instruction::PrimaryOpcode::kCOP0:
       switch (const bool flag = instruction.GetCoprocessorFlag();
               instruction.GetCoprocessorOpcode(flag)) {
+        case Instruction::CoprocessorOpcode::kMFC:
+          return outs << std::format(
+                     "mfc{} R{}, cop{}dat{}", instruction.GetCoprocessor(),
+                     instruction.GetT(), instruction.GetCoprocessor(),
+                     instruction.GetD());
         case Instruction::CoprocessorOpcode::kMTC:
           return outs << std::format(
                      "mtc{} R{}, cop{}dat{}", instruction.GetCoprocessor(),
