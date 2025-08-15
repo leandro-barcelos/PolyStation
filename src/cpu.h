@@ -41,6 +41,7 @@ class Instruction {
     kSLL = 0x00,
     kJR = 0x08,
     kADDU = 0x21,
+    kAND = 0x24,
     kOR = 0x25,
     kSLTU = 0x2B
   };
@@ -122,6 +123,7 @@ class CPU {
   void OpSLL(const Instruction& instruction);
   void OpJR(const Instruction& instruction);
   void OpADDU(const Instruction& instruction);
+  void OpAND(const Instruction& instruction);
   void OpOR(const Instruction& instruction);
   void OpSLTU(const Instruction& instruction);
   void OpJ(const Instruction& instruction);
