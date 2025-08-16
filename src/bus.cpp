@@ -15,28 +15,28 @@ uint32_t bus::MaskRegion(const uint32_t address) {
 
 std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
     const uint32_t address) {
-  if (kRam.InRange(address)) {
+  if (kRamMemoryRange.InRange(address)) {
     return MemoryRegion::kRam;
   }
-  if (kMemoryControl.InRange(address)) {
+  if (kMemoryControlMemoryRange.InRange(address)) {
     return MemoryRegion::kMemoryControl;
   }
-  if (kRamSize.InRange(address)) {
+  if (kRamSizeMemoryRange.InRange(address)) {
     return MemoryRegion::kRamSize;
   }
-  if (kSpuControl.InRange(address)) {
+  if (kSpuControlMemoryRange.InRange(address)) {
     return MemoryRegion::kSpuControl;
   }
-  if (kBios.InRange(address)) {
+  if (kBiosMemoryRange.InRange(address)) {
     return MemoryRegion::kBios;
   }
-  if (kCacheControl.InRange(address)) {
+  if (kCacheControlMemoryRange.InRange(address)) {
     return MemoryRegion::kCacheControl;
   }
-  if (kExpansionRegion2IntDipPost.InRange(address)) {
+  if (kExpansionRegion2IntDipPostMemoryRange.InRange(address)) {
     return MemoryRegion::kExpansionRegion2IntDipPost;
   }
-  if (kExpansion1.InRange(address)) {
+  if (kExpansion1MemoryRange.InRange(address)) {
     return MemoryRegion::kExpansion1;
   }
   return std::nullopt;
@@ -59,11 +59,11 @@ uint32_t bus::Bus::Load32(uint32_t address) const {
 
   switch (region.value()) {
     case MemoryRegion::kBios: {
-      const uint32_t offset = address - kBios.base;
+      const uint32_t offset = address - kBiosMemoryRange.base;
       return bios_.Load32(offset);
     }
     case MemoryRegion::kRam: {
-      const uint32_t offset = address - kRam.base;
+      const uint32_t offset = address - kRamMemoryRange.base;
       return ram_.Load32(offset);
     }
     default:
@@ -84,13 +84,13 @@ uint8_t bus::Bus::Load8(uint32_t address) const {
 
   switch (region.value()) {
     case MemoryRegion::kBios: {
-      const uint32_t offset = address - kBios.base;
+      const uint32_t offset = address - kBiosMemoryRange.base;
       return bios_.Load8(offset);
     }
     case MemoryRegion::kExpansion1:
       return 0xFF;
     case MemoryRegion::kRam: {
-      const uint32_t offset = address - kRam.base;
+      const uint32_t offset = address - kRamMemoryRange.base;
       return ram_.Load8(offset);
     }
     default:
@@ -116,7 +116,7 @@ void bus::Bus::Store32(uint32_t address, uint32_t value) {
 
   switch (region.value()) {
     case MemoryRegion::kMemoryControl:
-      switch (address - kMemoryControl.base) {
+      switch (address - kMemoryControlMemoryRange.base) {
         case 0:
           if (value != 0x1f000000) {
             throw std::runtime_error(std::format(
@@ -141,7 +141,7 @@ void bus::Bus::Store32(uint32_t address, uint32_t value) {
       std::cout << "unhandled write to Cache Control register" << '\n';
       break;
     case MemoryRegion::kRam: {
-      const uint32_t offset = address - kRam.base;
+      const uint32_t offset = address - kRamMemoryRange.base;
       ram_.Store32(offset, value);
       break;
     }
@@ -195,7 +195,7 @@ void bus::Bus::Store8(uint32_t address, uint8_t value) {
                 << '\n';
       break;
     case MemoryRegion::kRam: {
-      const uint32_t offset = address - kRam.base;
+      const uint32_t offset = address - kRamMemoryRange.base;
       ram_.Store8(offset, value);
       break;
     }

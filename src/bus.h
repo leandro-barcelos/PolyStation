@@ -13,15 +13,19 @@ struct MemoryRange {
   [[nodiscard]] bool InRange(uint32_t address) const;
 } __attribute__((aligned(8)));
 
-constexpr MemoryRange kBios = {.base = 0x1FC00000, .size = 0x80000};
-constexpr MemoryRange kRam = {.base = 0x00000000, .size = 0x200000};
-constexpr MemoryRange kMemoryControl{.base = 0x1F801000, .size = 0x24};
-constexpr MemoryRange kRamSize{.base = 0x1F801060, .size = 0x4};
-constexpr MemoryRange kCacheControl{.base = 0xFFFE0130, .size = 0x4};
-constexpr MemoryRange kSpuControl{.base = 0x1F801D80, .size = 0x40};
-constexpr MemoryRange kExpansionRegion2IntDipPost{.base = 0x1F802000,
-                                                  .size = 0x71};
-constexpr MemoryRange kExpansion1{.base = 0x1F000000, .size = 0xB0};
+constexpr MemoryRange kBiosMemoryRange = {.base = 0x1FC00000, .size = 0x80000};
+constexpr MemoryRange kRamMemoryRange = {.base = 0x00000000, .size = 0x200000};
+constexpr MemoryRange kMemoryControlMemoryRange = {.base = 0x1F801000,
+                                                   .size = 0x24};
+constexpr MemoryRange kRamSizeMemoryRange = {.base = 0x1F801060, .size = 0x4};
+constexpr MemoryRange kCacheControlMemoryRange = {.base = 0xFFFE0130,
+                                                  .size = 0x4};
+constexpr MemoryRange kSpuControlMemoryRange = {.base = 0x1F801D80,
+                                                .size = 0x40};
+constexpr MemoryRange kExpansionRegion2IntDipPostMemoryRange = {
+    .base = 0x1F802000, .size = 0x71};
+constexpr MemoryRange kExpansion1MemoryRange = {.base = 0x1F000000,
+                                                .size = 0xB0};
 
 constexpr std::array<uint32_t, 8> kRegionMask{
     0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,

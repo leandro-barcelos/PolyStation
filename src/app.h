@@ -62,7 +62,7 @@ class Application {
   std::array<char, 1024> error_message_{};
 
   bool step_to_pc_ = false;
-  uint32_t target_pc_ = bus::kBios.base;
+  uint32_t target_pc_ = bios::kBiosBase;
 
   void InitSDL();
   void InitVulkan();

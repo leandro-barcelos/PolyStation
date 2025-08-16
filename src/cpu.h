@@ -104,8 +104,8 @@ class CPU {
   [[nodiscard]] uint32_t Load32(uint32_t address) const;
 
  private:
-  uint32_t program_counter_ = bus::kBios.base;
-  uint32_t prev_program_counter_ = bus::kBios.base - 4;
+  uint32_t program_counter_ = bios::kBiosBase;
+  uint32_t prev_program_counter_ = bios::kBiosBase - 4;
   Instruction next_instruction_{0x0};
   std::array<uint32_t, kNumberOfRegisters> read_registers_{};
   std::array<uint32_t, kNumberOfRegisters> write_registers_ = read_registers_;

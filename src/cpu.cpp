@@ -9,7 +9,7 @@ bool cpu::COP0::IsCacheIsolated() const {
 }
 
 void cpu::CPU::Reset() {
-  program_counter_ = bus::kBios.base;
+  program_counter_ = bios::kBiosBase;
   next_instruction_ = Instruction(0x0);
   read_registers_.fill(0);
   step_count_ = 0;
