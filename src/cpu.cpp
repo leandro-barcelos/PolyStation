@@ -148,6 +148,9 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
     case Instruction::SecondaryOpcode::kJR:
       OpJR(instruction);
       break;
+    case Instruction::SecondaryOpcode::kADD:
+      OpADD(instruction);
+      break;
     case Instruction::SecondaryOpcode::kADDU:
       OpADDU(instruction);
       break;
@@ -179,6 +182,19 @@ void cpu::CPU::OpJR(const Instruction& instruction) {
   const uint32_t register_s = GetRegister(instruction.GetS());
 
   program_counter_ = register_s;
+}
+
+void cpu::CPU::OpADD(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t register_t = GetRegister(instruction.GetT());
+
+  int32_t result = 0;
+  if (CheckedSum<int32_t>(static_cast<int32_t>(register_s),
+                          static_cast<int32_t>(register_t), &result)) {
+    throw std::runtime_error("overflow in ADD");
+  }
+
+  SetRegister(instruction.GetD(), static_cast<uint32_t>(result));
 }
 
 void cpu::CPU::OpADDU(const Instruction& instruction) {
@@ -444,6 +460,9 @@ std::ostream& cpu::operator<<(std::ostream& outs,
                                      instruction.GetImmediate16());
         case Instruction::SecondaryOpcode::kJR:
           return outs << std::format("jr R{}", instruction.GetS());
+        case Instruction::SecondaryOpcode::kADD:
+          return outs << std::format("add R{}, R{}, R{}", instruction.GetD(),
+                                     instruction.GetS(), instruction.GetT());
         case Instruction::SecondaryOpcode::kADDU:
           return outs << std::format("addu R{}, R{}, R{}", instruction.GetD(),
                                      instruction.GetS(), instruction.GetT());
