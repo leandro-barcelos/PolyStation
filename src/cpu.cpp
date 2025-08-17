@@ -90,8 +90,10 @@ uint32_t cpu::CPU::GetRegister(const uint32_t index) const {
 }
 
 void cpu::CPU::SetRegister(const uint32_t index, const uint32_t value) {
+  gsl::at(write_registers_, 0) = 0;
+
   if (index == 0 && value != 0) {
-    throw std::runtime_error("tried to write to register zero");
+    return;
   }
 
   gsl::at(write_registers_, index) = value;
