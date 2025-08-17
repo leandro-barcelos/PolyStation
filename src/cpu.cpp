@@ -181,7 +181,7 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
 
 void cpu::CPU::OpSLL(const Instruction& instruction) {
   const uint32_t register_t = GetRegister(instruction.GetT());
-  const uint16_t immediate = instruction.GetImmediate16();
+  const uint16_t immediate = instruction.GetShift();
 
   const uint32_t result = register_t << immediate;
   SetRegister(instruction.GetD(), result);
@@ -446,6 +446,8 @@ uint8_t cpu::Instruction::GetS() const { return data_ >> 21U & 0x1FU; }
 uint8_t cpu::Instruction::GetT() const { return data_ >> 16U & 0x1FU; }
 
 uint8_t cpu::Instruction::GetD() const { return data_ >> 11U & 0x1FU; }
+
+uint8_t cpu::Instruction::GetShift() const { return (data_ >> 6U) & 0x1FU; }
 
 uint16_t cpu::Instruction::GetImmediate16() const { return data_ & 0xFFFFU; }
 

@@ -57,6 +57,7 @@ class Instruction {
   [[nodiscard]] uint8_t GetS() const;
   [[nodiscard]] uint8_t GetT() const;
   [[nodiscard]] uint8_t GetD() const;
+  [[nodiscard]] uint8_t GetShift() const;
   [[nodiscard]] uint16_t GetImmediate16() const;
   [[nodiscard]] uint32_t GetImmediate16SignExtend() const;
   [[nodiscard]] uint32_t GetImmediate26() const;
