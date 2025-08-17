@@ -39,6 +39,9 @@ std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
   if (kExpansion1MemoryRange.InRange(address)) {
     return MemoryRegion::kExpansion1;
   }
+  if (kInterruptControlMemoryRange.InRange(address)) {
+    return MemoryRegion::kInterruptControl;
+  }
   return std::nullopt;
 }
 
@@ -147,6 +150,9 @@ void bus::Bus::Store32(uint32_t address, uint32_t value) {
     }
     case MemoryRegion::kSpuControl:
       std::cout << "unhandled write to SPU control registers" << '\n';
+      break;
+    case MemoryRegion::kInterruptControl:
+      std::cout << "unhandled write to interrupt control registers" << '\n';
       break;
     default:
       throw std::runtime_error(
