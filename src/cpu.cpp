@@ -142,6 +142,13 @@ void cpu::CPU::Store8(const uint32_t address, const uint8_t value) {
   bus_.Store8(address, value);
 }
 
+void cpu::CPU::Branch(uint32_t offset) {
+  offset <<= 2U;
+
+  program_counter_ += offset;
+  program_counter_ -= 4;
+}
+
 void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
   switch (instruction.GetSecondaryOpcode()) {
     case Instruction::SecondaryOpcode::kSLL:
@@ -248,8 +255,7 @@ void cpu::CPU::OpBEQ(const Instruction& instruction) {
   const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   if (register_s == register_t) {
-    program_counter_ -= 4;
-    program_counter_ += (immediate << 2U);
+    Branch(immediate);
   }
 }
 
@@ -259,8 +265,7 @@ void cpu::CPU::OpBNE(const Instruction& instruction) {
   const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   if (register_s != register_t) {
-    program_counter_ -= 4;
-    program_counter_ += (immediate << 2U);
+    Branch(immediate);
   }
 }
 

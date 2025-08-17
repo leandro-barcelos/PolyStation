@@ -120,6 +120,8 @@ class CPU {
   void Store16(uint32_t address, uint16_t value);
   void Store8(uint32_t address, uint8_t value);
 
+  void Branch(uint32_t offset);
+
   void OpSPECIAL(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
   void OpJR(const Instruction& instruction);
