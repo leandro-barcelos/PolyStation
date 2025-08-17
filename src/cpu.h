@@ -33,8 +33,7 @@ class Instruction {
     kLW = 0x23,
     kSB = 0x28,
     kSH = 0x29,
-    kSW = 0x2B,
-    kNOP = 0xFF
+    kSW = 0x2B
   };
 
   enum class SecondaryOpcode : uint8_t {
