@@ -372,9 +372,10 @@ void cpu::CPU::OpLB(const Instruction& instruction) {
   const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   const uint32_t address = register_s + immediate;
-  const uint8_t value = bus_.Load8(address);
+  const auto value = static_cast<int8_t>(bus_.Load8(address));
 
-  load_delay_slots_ = LoadDelaySlots(instruction.GetT(), value);
+  load_delay_slots_ =
+      LoadDelaySlots(instruction.GetT(), static_cast<uint32_t>(value));
 }
 
 void cpu::CPU::OpLW(const Instruction& instruction) {
