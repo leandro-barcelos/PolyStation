@@ -23,6 +23,7 @@ class Instruction {
     kJAL = 0x03,
     kBEQ = 0x04,
     kBNE = 0x05,
+    kBGTZ = 0x07,
     kADDI = 0x08,
     kADDIU = 0x09,
     kANDI = 0x0C,
@@ -134,6 +135,7 @@ class CPU {
   void OpJAL(const Instruction& instruction);
   void OpBEQ(const Instruction& instruction);
   void OpBNE(const Instruction& instruction);
+  void OpBGTZ(const Instruction& instruction);
   void OpADDI(const Instruction& instruction);
   void OpADDIU(const Instruction& instruction);
   void OpANDI(const Instruction& instruction);
