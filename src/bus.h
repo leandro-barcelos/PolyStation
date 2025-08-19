@@ -26,7 +26,7 @@ constexpr MemoryRange kExpansionRegion2IntDipPostMemoryRange = {
     .base = 0x1F802000, .size = 0x71};
 constexpr MemoryRange kExpansion1MemoryRange = {.base = 0x1F000000,
                                                 .size = 0xB0};
-constexpr MemoryRange kInterruptControlMemoryRange = {.base = 0x1F801074,
+constexpr MemoryRange kInterruptControlMemoryRange = {.base = 0x1F801070,
                                                       .size = 0x08};
 
 constexpr std::array<uint32_t, 8> kRegionMask{
