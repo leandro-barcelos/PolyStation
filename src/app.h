@@ -10,7 +10,7 @@
 #include "imgui.h"
 #include "imgui_impl_vulkan.h"
 
-// #define APP_USE_UNLIMITED_FRAME_RATE
+#define APP_USE_UNLIMITED_FRAME_RATE
 
 #ifdef NDEBUG
 constexpr bool kEnableValidationLayers = false;
