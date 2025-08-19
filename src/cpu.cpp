@@ -41,6 +41,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kBNE:
       OpBNE(instruction);
       break;
+    case Instruction::PrimaryOpcode::kBLEZ:
+      OpBLEZ(instruction);
+      break;
     case Instruction::PrimaryOpcode::kBGTZ:
       OpBGTZ(instruction);
       break;
@@ -268,6 +271,15 @@ void cpu::CPU::OpBNE(const Instruction& instruction) {
   const uint32_t immediate = instruction.GetImmediate16SignExtend();
 
   if (register_s != register_t) {
+    Branch(immediate);
+  }
+}
+
+void cpu::CPU::OpBLEZ(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  if (static_cast<int32_t>(register_s) <= 0) {
     Branch(immediate);
   }
 }
@@ -508,13 +520,17 @@ std::ostream& cpu::operator<<(std::ostream& outs,
       return outs << std::format(
                  "beq R{}, R{}, {}", instruction.GetS(), instruction.GetT(),
                  static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
-    case Instruction::PrimaryOpcode::kBGTZ:
-      return outs << std::format(
-                 "bgtz R{}, {}", instruction.GetS(),
-                 static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
     case Instruction::PrimaryOpcode::kBNE:
       return outs << std::format(
                  "bne R{}, R{}, {}", instruction.GetS(), instruction.GetT(),
+                 static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
+    case Instruction::PrimaryOpcode::kBLEZ:
+      return outs << std::format(
+                 "blez R{}, {}", instruction.GetS(),
+                 static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
+    case Instruction::PrimaryOpcode::kBGTZ:
+      return outs << std::format(
+                 "bgtz R{}, {}", instruction.GetS(),
                  static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
     case Instruction::PrimaryOpcode::kADDI:
       return outs << std::format(
