@@ -33,6 +33,7 @@ class Instruction {
     kCOP0 = 0x10,
     kLB = 0x20,
     kLW = 0x23,
+    kLBU = 0x24,
     kSB = 0x28,
     kSH = 0x29,
     kSW = 0x2B
@@ -152,6 +153,7 @@ class CPU {
   void OpMTC0(const Instruction& instruction);
   void OpLB(const Instruction& instruction);
   void OpLW(const Instruction& instruction);
+  void OpLBU(const Instruction& instruction);
   void OpSB(const Instruction& instruction);
   void OpSH(const Instruction& instruction);
   void OpSW(const Instruction& instruction);

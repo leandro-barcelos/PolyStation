@@ -77,6 +77,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kLW:
       OpLW(instruction);
       break;
+    case Instruction::PrimaryOpcode::kLBU:
+      OpLBU(instruction);
+      break;
     case Instruction::PrimaryOpcode::kSB:
       OpSB(instruction);
       break;
@@ -423,6 +426,22 @@ void cpu::CPU::OpLW(const Instruction& instruction) {
   load_delay_slots_ = LoadDelaySlots(instruction.GetT(), value);
 }
 
+void cpu::CPU::OpLBU(const Instruction& instruction) {
+  if (cop0_.IsCacheIsolated()) {
+    std::cout << "ignoring load while cache is isolated" << '\n';
+    return;
+  }
+
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  const uint32_t address = register_s + immediate;
+  const uint8_t value = bus_.Load8(address);
+
+  load_delay_slots_ =
+      LoadDelaySlots(instruction.GetT(), static_cast<uint32_t>(value));
+}
+
 void cpu::CPU::OpSB(const Instruction& instruction) {
   const uint32_t register_s = GetRegister(instruction.GetS());
   const uint32_t register_t = GetRegister(instruction.GetT());
@@ -579,6 +598,10 @@ std::ostream& cpu::operator<<(std::ostream& outs,
                                  instruction.GetS());
     case Instruction::PrimaryOpcode::kLW:
       return outs << std::format("lw R{}, {:04X}(R{})", instruction.GetT(),
+                                 instruction.GetImmediate16SignExtend(),
+                                 instruction.GetS());
+    case Instruction::PrimaryOpcode::kLBU:
+      return outs << std::format("lbu R{}, {:04X}(R{})", instruction.GetT(),
                                  instruction.GetImmediate16SignExtend(),
                                  instruction.GetS());
     case Instruction::PrimaryOpcode::kSB:
