@@ -4,8 +4,14 @@
 #include <gsl/gsl>
 #include <iostream>
 
+uint32_t cpu::COP0::GetStatusRegister() const { return status_register_; }
+
+void cpu::COP0::SetStatusRegister(const uint32_t value) {
+  status_register_ = value;
+}
+
 bool cpu::COP0::IsCacheIsolated() const {
-  return (status_register & 0x10000) != 0U;
+  return (status_register_ & 0x10000) != 0U;
 }
 
 void cpu::CPU::Reset() {
@@ -356,7 +362,7 @@ void cpu::CPU::OpCOP0(const Instruction& instruction) {
 void cpu::CPU::OpMFC0(const Instruction& instruction) {
   switch (instruction.GetD()) {
     case COP0::Registers::kStatusRegister:
-      SetRegister(instruction.GetT(), cop0_.status_register);
+      SetRegister(instruction.GetT(), cop0_.GetStatusRegister());
       break;
     default:
       throw std::runtime_error(
@@ -369,7 +375,7 @@ void cpu::CPU::OpMTC0(const Instruction& instruction) {
 
   switch (instruction.GetD()) {
     case COP0::Registers::kStatusRegister:
-      cop0_.status_register = register_t;
+      cop0_.SetStatusRegister(register_t);
       break;
     case COP0::Registers::kBPC:
     case COP0::Registers::kBDA:

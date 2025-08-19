@@ -69,8 +69,10 @@ class Instruction {
 };
 
 struct COP0 {
-  uint32_t status_register = 0;
+ private:
+  uint32_t status_register_ = 0;
 
+ public:
   enum Registers : uint8_t {
     kBPC = 0x3,
     kBDA = 0x5,
@@ -82,6 +84,8 @@ struct COP0 {
     kCAUSE = 0xD
   };
 
+  [[nodiscard]] uint32_t GetStatusRegister() const;
+  void SetStatusRegister(uint32_t value);
   [[nodiscard]] bool IsCacheIsolated() const;
 };
 

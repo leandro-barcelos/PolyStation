@@ -433,7 +433,7 @@ void app::Application::DrawCPUStateWindow() const {
         ImGui::TableNextColumn();
         ImGui::Text("R12 (Status)");
         ImGui::TableNextColumn();
-        const uint32_t status_value = cpu_.GetCop0().status_register;
+        const uint32_t status_value = cpu_.GetCop0().GetStatusRegister();
         if (status_value != 0) {
           ImGui::TextColored(ImVec4(0.2F, 1.0F, 0.2F, 1.0F), "0x%08X",
                              status_value);
