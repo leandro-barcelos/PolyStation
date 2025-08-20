@@ -534,21 +534,34 @@ void app::Application::DrawCpuDisassembler() const {
 
   uint32_t start_pc = current_pc;
   if (constexpr uint32_t kInstructionsBefore = 5;
-      current_pc >= bios::kBiosBase + (kInstructionsBefore * 4)) {
+      current_pc >= kInstructionsBefore * 4) {
     start_pc = current_pc - (kInstructionsBefore * 4);
   } else {
-    start_pc = bios::kBiosBase;
+    start_pc = 0;
   }
 
   start_pc = (start_pc / 4) * 4;
 
   for (uint32_t pc = start_pc; pc < start_pc + (kMaxInstructions * 4);
        pc += 4) {
-    if (pc < bios::kBiosBase || pc >= bios::kBiosBase + bios::kBiosSize) {
+    bool valid_address = false;
+
+    if (pc >= bios::kBiosBase && pc < bios::kBiosBase + bios::kBiosSize) {
+      valid_address = true;
+    } else if (bus::kRamMemoryRange.InRange(pc)) {
+      valid_address = true;
+    }
+    if (!valid_address) {
       continue;
     }
 
-    const uint32_t instruction_data = cpu_.Load32(pc);
+    uint32_t instruction_data = 0;
+    try {
+      instruction_data = cpu_.Load32(pc);
+    } catch (const std::exception&) {
+      continue;
+    }
+
     const cpu::Instruction instruction(instruction_data);
 
     if (pc == current_pc) {
@@ -576,6 +589,13 @@ void app::Application::DrawCpuDisassembler() const {
     const ImU32 separator_color = ImGui::GetColorU32(ImGuiCol_Separator);
     draw_list->AddLine(line_start, line_end, separator_color, 1.0f);
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 10.0f);
+    ImGui::SameLine();
+
+    if (pc >= bios::kBiosBase && pc < bios::kBiosBase + bios::kBiosSize) {
+      ImGui::TextColored(ImVec4(0.8F, 0.8F, 0.2F, 1.0F), "[BIOS] ");
+    } else if (bus::kRamMemoryRange.InRange(pc)) {
+      ImGui::TextColored(ImVec4(0.2F, 0.8F, 0.2F, 1.0F), "[RAM]  ");
+    }
     ImGui::SameLine();
 
     ImGui::Text("%s", instruction.ToString().c_str());
