@@ -202,10 +202,22 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
 
 void cpu::CPU::OpBcondZ(const Instruction& instruction) {
   switch (instruction.GetConditionOpcode()) {
+    case Instruction::ConditionOpcode::kBLTZ:
+      OpBLTZ(instruction);
+      break;
     default:
       throw std::runtime_error(
           std::format("unhandled condition opcode {:02X}",
                       static_cast<uint8_t>(instruction.GetConditionOpcode())));
+  }
+}
+
+void cpu::CPU::OpBLTZ(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  if (static_cast<int32_t>(register_s) < 0) {
+    Branch(immediate);
   }
 }
 
@@ -563,6 +575,14 @@ std::ostream& cpu::operator<<(std::ostream& outs,
         case Instruction::SecondaryOpcode::kSLTU:
           return outs << std::format("sltu R{}, R{}, R{}", instruction.GetD(),
                                      instruction.GetS(), instruction.GetT());
+        default:
+          return outs << std::format("0x{:08X}", instruction.GetRawData());
+      }
+    case Instruction::PrimaryOpcode::kBcondZ:
+      switch (instruction.GetConditionOpcode()) {
+        case Instruction::ConditionOpcode::kBLTZ:
+          return outs << std::format("bltz R{}, {}", instruction.GetS(),
+                                     instruction.GetImmediate16SignExtend());
         default:
           return outs << std::format("0x{:08X}", instruction.GetRawData());
       }
