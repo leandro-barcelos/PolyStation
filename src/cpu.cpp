@@ -172,6 +172,9 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
     case Instruction::SecondaryOpcode::kJR:
       OpJR(instruction);
       break;
+    case Instruction::SecondaryOpcode::kJALR:
+      OpJALR(instruction);
+      break;
     case Instruction::SecondaryOpcode::kADD:
       OpADD(instruction);
       break;
@@ -205,6 +208,13 @@ void cpu::CPU::OpSLL(const Instruction& instruction) {
 void cpu::CPU::OpJR(const Instruction& instruction) {
   const uint32_t register_s = GetRegister(instruction.GetS());
 
+  program_counter_ = register_s;
+}
+
+void cpu::CPU::OpJALR(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+
+  SetRegister(instruction.GetD(), GetPC());
   program_counter_ = register_s;
 }
 
@@ -519,6 +529,9 @@ std::ostream& cpu::operator<<(std::ostream& outs,
                                      instruction.GetImmediate16());
         case Instruction::SecondaryOpcode::kJR:
           return outs << std::format("jr R{}", instruction.GetS());
+        case Instruction::SecondaryOpcode::kJALR:
+          return outs << std::format("jalr R{}, R{}", instruction.GetD(),
+                                     instruction.GetS());
         case Instruction::SecondaryOpcode::kADD:
           return outs << std::format("add R{}, R{}, R{}", instruction.GetD(),
                                      instruction.GetS(), instruction.GetT());
