@@ -19,6 +19,7 @@ class Instruction {
 
   enum class PrimaryOpcode : uint8_t {
     kSPECIAL = 0x00,
+    kBcondZ = 0x01,
     kJ = 0x02,
     kJAL = 0x03,
     kBEQ = 0x04,
@@ -52,10 +53,13 @@ class Instruction {
 
   enum class CoprocessorOpcode : uint8_t { kMFC = 0x00, kMTC = 0x04 };
 
+  enum class ConditionOpcode : uint8_t {};
+
   [[nodiscard]] uint32_t GetRawData() const { return data_; }
   [[nodiscard]] PrimaryOpcode GetPrimaryOpcode() const;
   [[nodiscard]] SecondaryOpcode GetSecondaryOpcode() const;
   [[nodiscard]] CoprocessorOpcode GetCoprocessorOpcode(bool flag) const;
+  [[nodiscard]] ConditionOpcode GetConditionOpcode() const;
   [[nodiscard]] uint8_t GetCoprocessor() const;
   [[nodiscard]] bool GetCoprocessorFlag() const;
   [[nodiscard]] uint8_t GetS() const;
@@ -131,6 +135,7 @@ class CPU {
   void Branch(uint32_t offset);
 
   void OpSPECIAL(const Instruction& instruction);
+  void OpBcondZ(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
   void OpJR(const Instruction& instruction);
   void OpJALR(const Instruction& instruction);

@@ -35,6 +35,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kSPECIAL:
       OpSPECIAL(instruction);
       break;
+    case Instruction::PrimaryOpcode::kBcondZ:
+      OpBcondZ(instruction);
+      break;
     case Instruction::PrimaryOpcode::kJ:
       OpJ(instruction);
       break;
@@ -194,6 +197,15 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
       throw std::runtime_error(
           std::format("unhandled secondary opcode {:02X}",
                       static_cast<uint8_t>(instruction.GetSecondaryOpcode())));
+  }
+}
+
+void cpu::CPU::OpBcondZ(const Instruction& instruction) {
+  switch (instruction.GetConditionOpcode()) {
+    default:
+      throw std::runtime_error(
+          std::format("unhandled condition opcode {:02X}",
+                      static_cast<uint8_t>(instruction.GetConditionOpcode())));
   }
 }
 
@@ -493,6 +505,10 @@ cpu::Instruction::CoprocessorOpcode cpu::Instruction::GetCoprocessorOpcode(
   }
 
   return static_cast<CoprocessorOpcode>(data_ >> 21U & 0x1FU);
+}
+
+cpu::Instruction::ConditionOpcode cpu::Instruction::GetConditionOpcode() const {
+  return static_cast<ConditionOpcode>(data_ >> 16U & 0x1FU);
 }
 
 uint8_t cpu::Instruction::GetCoprocessor() const { return data_ >> 26U & 0x3U; }
