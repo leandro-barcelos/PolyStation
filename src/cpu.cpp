@@ -187,6 +187,9 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
     case Instruction::SecondaryOpcode::kADDU:
       OpADDU(instruction);
       break;
+    case Instruction::SecondaryOpcode::kSUBU:
+      OpSUBU(instruction);
+      break;
     case Instruction::SecondaryOpcode::kAND:
       OpAND(instruction);
       break;
@@ -263,6 +266,14 @@ void cpu::CPU::OpADDU(const Instruction& instruction) {
   const uint32_t register_t = GetRegister(instruction.GetT());
 
   const uint32_t result = register_s + register_t;
+  SetRegister(instruction.GetD(), result);
+}
+
+void cpu::CPU::OpSUBU(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t register_t = GetRegister(instruction.GetT());
+
+  const uint32_t result = register_s - register_t;
   SetRegister(instruction.GetD(), result);
 }
 
@@ -576,6 +587,9 @@ std::ostream& cpu::operator<<(std::ostream& outs,
                                      instruction.GetS(), instruction.GetT());
         case Instruction::SecondaryOpcode::kADDU:
           return outs << std::format("addu R{}, R{}, R{}", instruction.GetD(),
+                                     instruction.GetS(), instruction.GetT());
+        case Instruction::SecondaryOpcode::kSUBU:
+          return outs << std::format("subu R{}, R{}, R{}", instruction.GetD(),
                                      instruction.GetS(), instruction.GetT());
         case Instruction::SecondaryOpcode::kAND:
           return outs << std::format("and R{}, R{}, R{}", instruction.GetD(),
