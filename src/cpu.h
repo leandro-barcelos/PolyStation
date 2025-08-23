@@ -116,6 +116,8 @@ class CPU {
   [[nodiscard]] uint32_t GetPC() const;
   [[nodiscard]] uint32_t GetPrevPC() const;
   [[nodiscard]] COP0 GetCop0() const;
+  [[nodiscard]] uint32_t GetHI() const;
+  [[nodiscard]] uint32_t GetLO() const;
 
   [[nodiscard]] uint32_t Load32(uint32_t address) const;
 
@@ -128,8 +130,8 @@ class CPU {
   LoadDelaySlots load_delay_slots_{};
   bus::Bus bus_;
   COP0 cop0_;
-  uint32_t hi_;
-  uint32_t lo_;
+  uint32_t hi_ = 0;
+  uint32_t lo_ = 0;
   unsigned long long step_count_ = 0;
 
   [[nodiscard]] uint8_t Load8(uint32_t address) const;

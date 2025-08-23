@@ -87,6 +87,7 @@ class Application {
   void DrawErrorPopup();
   static void DrawMainViewWindow();
   static void SetupDockingLayout();
+  static void DrawTableCell(const char* reg_name, uint32_t reg_value);
 
   [[nodiscard]] std::vector<const char*> GetRequiredExtensions() const;
   static bool IsExtensionAvailable(

@@ -128,6 +128,10 @@ uint32_t cpu::CPU::GetPrevPC() const { return prev_program_counter_; }
 
 cpu::COP0 cpu::CPU::GetCop0() const { return cop0_; }
 
+uint32_t cpu::CPU::GetHI() const { return hi_; }
+
+uint32_t cpu::CPU::GetLO() const { return lo_; }
+
 uint32_t cpu::CPU::Load32(const uint32_t address) const {
   return bus_.Load32(address);
 }

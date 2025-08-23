@@ -385,32 +385,16 @@ void app::Application::DrawCPUStateWindow() const {
                 "R25 (t9)",  "R26 (k0)", "R27 (k1)", "R28 (gp)", "R29 (sp)",
                 "R30 (fp)",  "R31 (ra)"};
             int const reg_index = (row * 4) + col;
-            // Register name
-            ImGui::TableNextColumn();
-            ImGui::Text("%s", gsl::at(kRegisterNames, reg_index));
-            // Hex value
-            ImGui::TableNextColumn();
-            if (reg_index == 0) {
-              // R0 is always zero in MIPS
-              ImGui::TextColored(ImVec4(0.5F, 0.5F, 0.5F, 1.0F), "0x00000000");
-            } else if (cpu_.GetRegister(reg_index) != 0) {
-              ImGui::TextColored(ImVec4(0.2F, 1.0F, 0.2F, 1.0F), "0x%08X",
-                                 cpu_.GetRegister(reg_index));
-            } else {
-              ImGui::Text("0x%08X", cpu_.GetRegister(reg_index));
-            }
-            // Decimal value
-            ImGui::TableNextColumn();
-            if (reg_index == 0) {
-              ImGui::TextColored(ImVec4(0.5F, 0.5F, 0.5F, 1.0F), "0");
-            } else if (cpu_.GetRegister(reg_index) != 0) {
-              ImGui::TextColored(ImVec4(0.2F, 1.0F, 0.2F, 1.0F), "%u",
-                                 cpu_.GetRegister(reg_index));
-            } else {
-              ImGui::Text("%u", cpu_.GetRegister(reg_index));
-            }
+            DrawTableCell(gsl::at(kRegisterNames, reg_index),
+                          cpu_.GetRegister(reg_index));
           }
         }
+
+        // HI / LO
+        ImGui::TableNextRow();
+        DrawTableCell("HI", cpu_.GetLO());
+        DrawTableCell("LO", cpu_.GetLO());
+
         ImGui::EndTable();
       }
     } else {
@@ -710,6 +694,27 @@ void app::Application::SetupDockingLayout() {
   }
 
   ImGui::End();
+}
+
+void app::Application::DrawTableCell(const char* reg_name,
+                                     const uint32_t reg_value) {
+  // Register name
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", reg_name);
+  // Hex value
+  ImGui::TableNextColumn();
+  if (reg_value != 0) {
+    ImGui::TextColored(ImVec4(0.2F, 1.0F, 0.2F, 1.0F), "0x%08X", reg_value);
+  } else {
+    ImGui::Text("0x%08X", reg_value);
+  }
+  // Decimal value
+  ImGui::TableNextColumn();
+  if (reg_value != 0) {
+    ImGui::TextColored(ImVec4(0.2F, 1.0F, 0.2F, 1.0F), "%u", reg_value);
+  } else {
+    ImGui::Text("%u", reg_value);
+  }
 }
 
 void app::Application::Cleanup() {
