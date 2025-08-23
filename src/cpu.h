@@ -144,9 +144,6 @@ class CPU {
   void Branch(uint32_t offset);
 
   void OpSPECIAL(const Instruction& instruction);
-  void OpBcondZ(const Instruction& instruction);
-  void OpBLTZ(const Instruction& instruction);
-  void OpBGEZ(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
   void OpSRA(const Instruction& instruction);
   void OpJR(const Instruction& instruction);
@@ -159,6 +156,9 @@ class CPU {
   void OpOR(const Instruction& instruction);
   void OpDIV(const Instruction& instruction);
   void OpSLTU(const Instruction& instruction);
+  void OpBcondZ(const Instruction& instruction);
+  void OpBLTZ(const Instruction& instruction);
+  void OpBGEZ(const Instruction& instruction);
   void OpJ(const Instruction& instruction);
   void OpJAL(const Instruction& instruction);
   void OpBEQ(const Instruction& instruction);

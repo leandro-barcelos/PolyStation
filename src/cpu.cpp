@@ -219,39 +219,6 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
   }
 }
 
-void cpu::CPU::OpBcondZ(const Instruction& instruction) {
-  switch (instruction.GetConditionOpcode()) {
-    case Instruction::ConditionOpcode::kBLTZ:
-      OpBLTZ(instruction);
-      break;
-    case Instruction::ConditionOpcode::kBGEZ:
-      OpBGEZ(instruction);
-      break;
-    default:
-      throw std::runtime_error(
-          std::format("unhandled condition opcode {:02X}",
-                      static_cast<uint8_t>(instruction.GetConditionOpcode())));
-  }
-}
-
-void cpu::CPU::OpBLTZ(const Instruction& instruction) {
-  const uint32_t register_s = GetRegister(instruction.GetS());
-  const uint32_t immediate = instruction.GetImmediate16SignExtend();
-
-  if (static_cast<int32_t>(register_s) < 0) {
-    Branch(immediate);
-  }
-}
-
-void cpu::CPU::OpBGEZ(const Instruction& instruction) {
-  const uint32_t register_s = GetRegister(instruction.GetS());
-  const uint32_t immediate = instruction.GetImmediate16SignExtend();
-
-  if (static_cast<int32_t>(register_s) >= 0) {
-    Branch(immediate);
-  }
-}
-
 void cpu::CPU::OpSLL(const Instruction& instruction) {
   const uint32_t register_t = GetRegister(instruction.GetT());
   const uint16_t immediate = instruction.GetShift();
@@ -359,6 +326,39 @@ void cpu::CPU::OpSLTU(const Instruction& instruction) {
   const uint32_t register_t = GetRegister(instruction.GetT());
 
   SetRegister(instruction.GetD(), register_s < register_t ? 1 : 0);
+}
+
+void cpu::CPU::OpBcondZ(const Instruction& instruction) {
+  switch (instruction.GetConditionOpcode()) {
+    case Instruction::ConditionOpcode::kBLTZ:
+      OpBLTZ(instruction);
+      break;
+    case Instruction::ConditionOpcode::kBGEZ:
+      OpBGEZ(instruction);
+      break;
+    default:
+      throw std::runtime_error(
+          std::format("unhandled condition opcode {:02X}",
+                      static_cast<uint8_t>(instruction.GetConditionOpcode())));
+  }
+}
+
+void cpu::CPU::OpBLTZ(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  if (static_cast<int32_t>(register_s) < 0) {
+    Branch(immediate);
+  }
+}
+
+void cpu::CPU::OpBGEZ(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  if (static_cast<int32_t>(register_s) >= 0) {
+    Branch(immediate);
+  }
 }
 
 void cpu::CPU::OpJ(const Instruction& instruction) {
