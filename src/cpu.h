@@ -58,7 +58,7 @@ class Instruction {
 
   enum class CoprocessorOpcode : uint8_t { kMFC = 0x00, kMTC = 0x04 };
 
-  enum class ConditionOpcode : uint8_t { kBLTZ = 0x00 };
+  enum class ConditionOpcode : uint8_t { kBLTZ = 0x00, kBGEZ = 0x01 };
 
   [[nodiscard]] uint32_t GetRawData() const { return data_; }
   [[nodiscard]] PrimaryOpcode GetPrimaryOpcode() const;
@@ -146,6 +146,7 @@ class CPU {
   void OpSPECIAL(const Instruction& instruction);
   void OpBcondZ(const Instruction& instruction);
   void OpBLTZ(const Instruction& instruction);
+  void OpBGEZ(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
   void OpSRA(const Instruction& instruction);
   void OpJR(const Instruction& instruction);
