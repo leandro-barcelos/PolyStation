@@ -199,6 +199,9 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
     case Instruction::SecondaryOpcode::kOR:
       OpOR(instruction);
       break;
+    case Instruction::SecondaryOpcode::kDIV:
+      OpDIV(instruction);
+      break;
     case Instruction::SecondaryOpcode::kSLTU:
       OpSLTU(instruction);
       break;
@@ -302,6 +305,30 @@ void cpu::CPU::OpOR(const Instruction& instruction) {
 
   const uint32_t result = register_s | register_t;
   SetRegister(instruction.GetD(), result);
+}
+
+void cpu::CPU::OpDIV(const Instruction& instruction) {
+  const auto register_s = static_cast<int32_t>(GetRegister(instruction.GetS()));
+  const auto register_t = static_cast<int32_t>(GetRegister(instruction.GetT()));
+
+  if (register_t == 0) {
+    hi_ = static_cast<uint32_t>(register_s);
+
+    if (register_s >= 0) {
+      lo_ = 0xffffffff;
+    } else {
+      lo_ = 1;
+    }
+  } else if (register_s == 0x80000000 && register_t == 0xffffffff) {
+    hi_ = 0;
+    lo_ = 0x80000000;
+  } else {
+    const int32_t quotient = register_s / register_t;
+    const int32_t remainder = register_s % register_t;
+
+    lo_ = static_cast<uint32_t>(quotient);
+    hi_ = static_cast<uint32_t>(remainder);
+  }
 }
 
 void cpu::CPU::OpSLTU(const Instruction& instruction) {
@@ -612,6 +639,9 @@ std::ostream& cpu::operator<<(std::ostream& outs,
         case Instruction::SecondaryOpcode::kOR:
           return outs << std::format("or R{}, R{}, R{}", instruction.GetD(),
                                      instruction.GetS(), instruction.GetT());
+        case Instruction::SecondaryOpcode::kDIV:
+          return outs << std::format("div R{}, R{}", instruction.GetS(),
+                                     instruction.GetT());
         case Instruction::SecondaryOpcode::kSLTU:
           return outs << std::format("sltu R{}, R{}, R{}", instruction.GetD(),
                                      instruction.GetS(), instruction.GetT());

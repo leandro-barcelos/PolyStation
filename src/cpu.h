@@ -51,6 +51,7 @@ class Instruction {
     kSUBU = 0x23,
     kAND = 0x24,
     kOR = 0x25,
+    kDIV = 0x1A,
     kSLTU = 0x2B
   };
 
@@ -127,6 +128,8 @@ class CPU {
   LoadDelaySlots load_delay_slots_{};
   bus::Bus bus_;
   COP0 cop0_;
+  uint32_t hi_;
+  uint32_t lo_;
   unsigned long long step_count_ = 0;
 
   [[nodiscard]] uint8_t Load8(uint32_t address) const;
@@ -149,6 +152,7 @@ class CPU {
   void OpSUBU(const Instruction& instruction);
   void OpAND(const Instruction& instruction);
   void OpOR(const Instruction& instruction);
+  void OpDIV(const Instruction& instruction);
   void OpSLTU(const Instruction& instruction);
   void OpJ(const Instruction& instruction);
   void OpJAL(const Instruction& instruction);
