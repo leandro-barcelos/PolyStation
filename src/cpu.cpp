@@ -179,6 +179,9 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
     case Instruction::SecondaryOpcode::kSLL:
       OpSLL(instruction);
       break;
+    case Instruction::SecondaryOpcode::kSRL:
+      OpSRL(instruction);
+      break;
     case Instruction::SecondaryOpcode::kSRA:
       OpSRA(instruction);
       break;
@@ -224,6 +227,14 @@ void cpu::CPU::OpSLL(const Instruction& instruction) {
   const uint16_t immediate = instruction.GetShift();
 
   const uint32_t result = register_t << immediate;
+  SetRegister(instruction.GetD(), result);
+}
+
+void cpu::CPU::OpSRL(const Instruction& instruction) {
+  const uint32_t register_t = GetRegister(instruction.GetT());
+  const uint16_t immediate = instruction.GetShift();
+
+  const uint32_t result = register_t >> immediate;
   SetRegister(instruction.GetD(), result);
 }
 
@@ -636,6 +647,10 @@ std::ostream& cpu::operator<<(std::ostream& outs,
       switch (instruction.GetSecondaryOpcode()) {
         case Instruction::SecondaryOpcode::kSLL:
           return outs << std::format("sll R{}, R{}, {:04X}", instruction.GetD(),
+                                     instruction.GetT(),
+                                     instruction.GetImmediate16());
+        case Instruction::SecondaryOpcode::kSRL:
+          return outs << std::format("srl R{}, R{}, {:04X}", instruction.GetD(),
                                      instruction.GetT(),
                                      instruction.GetImmediate16());
         case Instruction::SecondaryOpcode::kSRA:
