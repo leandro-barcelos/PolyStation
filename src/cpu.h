@@ -29,6 +29,7 @@ class Instruction {
     kADDI = 0x08,
     kADDIU = 0x09,
     kSLTI = 0x0A,
+    kSLTIU = 0x0B,
     kANDI = 0x0C,
     kORI = 0x0D,
     kLUI = 0x0F,
@@ -170,6 +171,7 @@ class CPU {
   void OpADDI(const Instruction& instruction);
   void OpADDIU(const Instruction& instruction);
   void OpSLTI(const Instruction& instruction);
+  void OpSLTIU(const Instruction& instruction);
   void OpANDI(const Instruction& instruction);
   void OpORI(const Instruction& instruction);
   void OpLUI(const Instruction& instruction);

@@ -65,6 +65,9 @@ void cpu::CPU::Cycle() {
     case Instruction::PrimaryOpcode::kSLTI:
       OpSLTI(instruction);
       break;
+    case Instruction::PrimaryOpcode::kSLTIU:
+      OpSLTIU(instruction);
+      break;
     case Instruction::PrimaryOpcode::kANDI:
       OpANDI(instruction);
       break;
@@ -451,6 +454,13 @@ void cpu::CPU::OpSLTI(const Instruction& instruction) {
   SetRegister(instruction.GetT(), register_s < immediate ? 1 : 0);
 }
 
+void cpu::CPU::OpSLTIU(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t immediate = instruction.GetImmediate16SignExtend();
+
+  SetRegister(instruction.GetT(), register_s < immediate ? 1 : 0);
+}
+
 void cpu::CPU::OpANDI(const Instruction& instruction) {
   const uint32_t register_s = GetRegister(instruction.GetS());
   const uint32_t immediate = instruction.GetImmediate16();
@@ -731,6 +741,10 @@ std::ostream& cpu::operator<<(std::ostream& outs,
       return outs << std::format(
                  "slti R{}, R{}, {}", instruction.GetT(), instruction.GetS(),
                  static_cast<int32_t>(instruction.GetImmediate16SignExtend()));
+    case Instruction::PrimaryOpcode::kSLTIU:
+      return outs << std::format("sltiu R{}, R{}, {}", instruction.GetT(),
+                                 instruction.GetS(),
+                                 instruction.GetImmediate16SignExtend());
     case Instruction::PrimaryOpcode::kANDI:
       return outs << std::format("andi R{}, R{}, {:04X}", instruction.GetT(),
                                  instruction.GetS(),
