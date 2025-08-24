@@ -200,6 +200,9 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
     case Instruction::SecondaryOpcode::kDIV:
       OpDIV(instruction);
       break;
+    case Instruction::SecondaryOpcode::kDIVU:
+      OpDIVU(instruction);
+      break;
     case Instruction::SecondaryOpcode::kADD:
       OpADD(instruction);
       break;
@@ -287,6 +290,19 @@ void cpu::CPU::OpDIV(const Instruction& instruction) {
 
     lo_ = static_cast<uint32_t>(quotient);
     hi_ = static_cast<uint32_t>(remainder);
+  }
+}
+
+void cpu::CPU::OpDIVU(const Instruction& instruction) {
+  const uint32_t register_s = GetRegister(instruction.GetS());
+  const uint32_t register_t = GetRegister(instruction.GetT());
+
+  if (register_t == 0) {
+    hi_ = register_s;
+    lo_ = 0xffffffff;
+  } else {
+    lo_ = register_s / register_t;
+    hi_ = register_s % register_t;
   }
 }
 
@@ -679,6 +695,9 @@ std::ostream& cpu::operator<<(std::ostream& outs,
                                      instruction.GetS(), instruction.GetT());
         case Instruction::SecondaryOpcode::kDIV:
           return outs << std::format("div R{}, R{}", instruction.GetS(),
+                                     instruction.GetT());
+        case Instruction::SecondaryOpcode::kDIVU:
+          return outs << std::format("divu R{}, R{}", instruction.GetS(),
                                      instruction.GetT());
         case Instruction::SecondaryOpcode::kADDU:
           return outs << std::format("addu R{}, R{}, R{}", instruction.GetD(),
