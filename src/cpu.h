@@ -48,6 +48,7 @@ class Instruction {
     kSRA = 0x03,
     kJR = 0x08,
     kJALR = 0x09,
+    kMFHI = 0x10,
     kMFLO = 0x12,
     kDIV = 0x1A,
     kDIVU = 0x1B,
@@ -152,6 +153,7 @@ class CPU {
   void OpSRA(const Instruction& instruction);
   void OpJR(const Instruction& instruction);
   void OpJALR(const Instruction& instruction);
+  void OpMFHI(const Instruction& instruction);
   void OpMFLO(const Instruction& instruction);
   void OpDIV(const Instruction& instruction);
   void OpDIVU(const Instruction& instruction);

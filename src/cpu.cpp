@@ -194,6 +194,9 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
     case Instruction::SecondaryOpcode::kJALR:
       OpJALR(instruction);
       break;
+    case Instruction::SecondaryOpcode::kMFHI:
+      OpMFHI(instruction);
+      break;
     case Instruction::SecondaryOpcode::kMFLO:
       OpMFLO(instruction);
       break;
@@ -263,6 +266,10 @@ void cpu::CPU::OpJALR(const Instruction& instruction) {
 
   SetRegister(instruction.GetD(), GetPC());
   program_counter_ = register_s;
+}
+
+void cpu::CPU::OpMFHI(const Instruction& instruction) {
+  SetRegister(instruction.GetD(), hi_);
 }
 
 void cpu::CPU::OpMFLO(const Instruction& instruction) {
@@ -688,6 +695,8 @@ std::ostream& cpu::operator<<(std::ostream& outs,
         case Instruction::SecondaryOpcode::kJALR:
           return outs << std::format("jalr R{}, R{}", instruction.GetD(),
                                      instruction.GetS());
+        case Instruction::SecondaryOpcode::kMFHI:
+          return outs << std::format("mfhi R{}", instruction.GetD());
         case Instruction::SecondaryOpcode::kMFLO:
           return outs << std::format("mflo R{}", instruction.GetD());
         case Instruction::SecondaryOpcode::kADD:
