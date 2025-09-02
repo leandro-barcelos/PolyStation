@@ -69,6 +69,9 @@ uint32_t bus::Bus::Load32(uint32_t address) const {
       const uint32_t offset = address - kRamMemoryRange.base;
       return ram_.Load32(offset);
     }
+    case MemoryRegion::kInterruptControl:
+      std::cout << "unhandled read at interrupt control" << '\n';
+      return 0;
     default:
       throw std::runtime_error(
           std::format("unhandled load in address: {:08X}", address));
