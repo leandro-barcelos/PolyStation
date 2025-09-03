@@ -392,7 +392,7 @@ void app::Application::DrawCPUStateWindow() const {
 
         // HI / LO
         ImGui::TableNextRow();
-        DrawTableCell("HI", cpu_.GetLO());
+        DrawTableCell("HI", cpu_.GetHI());
         DrawTableCell("LO", cpu_.GetLO());
 
         ImGui::EndTable();
