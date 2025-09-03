@@ -186,7 +186,7 @@ void bus::Bus::Store16(uint32_t address, uint16_t value) {
       std::cout << "unhandled write to SPU control registers" << '\n';
       break;
     case MemoryRegion::kTimers:
-      std::cout << "unhandled write to SPU control registers" << '\n';
+      std::cout << "unhandled write to timers registers" << '\n';
       break;
     default:
       throw std::runtime_error(
