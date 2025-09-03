@@ -28,6 +28,7 @@ constexpr MemoryRange kExpansion1MemoryRange = {.base = 0x1F000000,
                                                 .size = 0xB0};
 constexpr MemoryRange kInterruptControlMemoryRange = {.base = 0x1F801070,
                                                       .size = 0x08};
+constexpr MemoryRange kTimersRange = {.base = 0x1F801100, .size = 0x40};
 
 constexpr std::array<uint32_t, 8> kRegionMask{
     0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
@@ -43,7 +44,8 @@ enum class MemoryRegion : uint8_t {
   kSpuControl,
   kExpansionRegion2IntDipPost,
   kExpansion1,
-  kInterruptControl
+  kInterruptControl,
+  kTimers
 };
 
 uint32_t MaskRegion(uint32_t address);

@@ -42,6 +42,9 @@ std::optional<bus::MemoryRegion> bus::GetMemoryRegionByAddress(
   if (kInterruptControlMemoryRange.InRange(address)) {
     return MemoryRegion::kInterruptControl;
   }
+  if (kTimersRange.InRange(address)) {
+    return MemoryRegion::kTimers;
+  }
   return std::nullopt;
 }
 
@@ -180,6 +183,9 @@ void bus::Bus::Store16(uint32_t address, uint16_t value) {
 
   switch (region.value()) {
     case MemoryRegion::kSpuControl:
+      std::cout << "unhandled write to SPU control registers" << '\n';
+      break;
+    case MemoryRegion::kTimers:
       std::cout << "unhandled write to SPU control registers" << '\n';
       break;
     default:
