@@ -680,6 +680,9 @@ uint32_t cpu::Instruction::GetImmediate16SignExtend() const {
   const auto value = static_cast<int16_t>(data_ & 0xFFFFU);
   return static_cast<uint32_t>(value);
 }
+uint32_t cpu::Instruction::GetImmediate20() const {
+  return (data_ >> 6U) & 0xFFFFFU;
+}
 
 uint32_t cpu::Instruction::GetImmediate26() const { return data_ & 0x3FFFFFFU; }
 
