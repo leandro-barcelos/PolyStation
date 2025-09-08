@@ -14,6 +14,16 @@ bool cpu::COP0::IsCacheIsolated() const {
   return (status_register_ & 0x10000) != 0U;
 }
 
+uint32_t cpu::COP0::GetCauseRegister() const { return cause_register_; }
+
+void cpu::COP0::SetCauseRegister(const uint32_t value) {
+  cause_register_ = value;
+}
+
+uint32_t cpu::COP0::GetEpcRegister() const { return epc_register_; }
+
+void cpu::COP0::SetEpcRegister(const uint32_t value) { epc_register_ = value; }
+
 void cpu::CPU::Reset() {
   program_counter_ = bios::kBiosBase;
   next_program_counter_ = bios::kBiosBase + kInstructionLength;
@@ -538,6 +548,11 @@ void cpu::CPU::OpMFC0(const Instruction& instruction) {
     case COP0::Registers::kStatusRegister:
       SetRegister(instruction.GetT(), cop0_.GetStatusRegister());
       break;
+    case COP0::Registers::kCAUSE:
+    case COP0::Registers::kEPC:
+      std::cout << std::format("unhandled read from cop0r{}",
+                               instruction.GetD())
+                << '\n';
     default:
       throw std::runtime_error(
           std::format("unhandled cop0 register {}", instruction.GetD()));

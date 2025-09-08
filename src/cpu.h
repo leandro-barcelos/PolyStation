@@ -88,6 +88,8 @@ class Instruction {
 struct COP0 {
  private:
   uint32_t status_register_ = 0;
+  uint32_t cause_register_ = 0;
+  uint32_t epc_register_ = 0;
 
  public:
   enum Registers : uint8_t {
@@ -98,13 +100,18 @@ struct COP0 {
     kBDAM = 0x9,
     kBPCM = 0xB,
     kStatusRegister = 0xC,
-    kCAUSE = 0xD
+    kCAUSE = 0xD,
+    kEPC = 0xE
   };
 
   [[nodiscard]] uint32_t GetStatusRegister() const;
   void SetStatusRegister(uint32_t value);
   [[nodiscard]] bool IsCacheIsolated() const;
-};
+  [[nodiscard]] uint32_t GetCauseRegister() const;
+  void SetCauseRegister(uint32_t value);
+  [[nodiscard]] uint32_t GetEpcRegister() const;
+  void SetEpcRegister(uint32_t value);
+} __attribute__((aligned(8)));
 
 struct LoadDelaySlots {
   uint32_t index = 0;
