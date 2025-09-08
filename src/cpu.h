@@ -10,6 +10,8 @@ constexpr uint32_t kNumberOfRegisters = 32;
 constexpr uint32_t kInstructionLength = 4;
 constexpr uint32_t kReturnAddress = 31;
 
+enum class Mode : bool { kKernel = false, kUser = true };
+
 class Instruction {
  public:
   Instruction() : data_(0) {}
@@ -48,6 +50,7 @@ class Instruction {
     kSRA = 0x03,
     kJR = 0x08,
     kJALR = 0x09,
+    kSYSCALL = 0x0C,
     kMFHI = 0x10,
     kMFLO = 0x12,
     kDIV = 0x1A,
@@ -104,11 +107,17 @@ struct COP0 {
     kEPC = 0xE
   };
 
+  enum HandlerAddress : uint32_t { kKSEG0 = 0x80000080, kKSEG1 = 0xBFC00180 };
+
   [[nodiscard]] uint32_t GetStatusRegister() const;
   void SetStatusRegister(uint32_t value);
   [[nodiscard]] bool IsCacheIsolated() const;
+  [[nodiscard]] HandlerAddress GetHandlerAddress() const;
+  Mode GetMode();
+
   [[nodiscard]] uint32_t GetCauseRegister() const;
   void SetCauseRegister(uint32_t value);
+
   [[nodiscard]] uint32_t GetEpcRegister() const;
   void SetEpcRegister(uint32_t value);
 } __attribute__((aligned(8)));
@@ -117,6 +126,10 @@ struct LoadDelaySlots {
   uint32_t index = 0;
   uint32_t value = 0;
 } __attribute__((aligned(8)));
+
+enum class ExceptionType : uint8_t {
+  kSysCall = 0x08,
+};
 
 class CPU {
  public:
@@ -138,6 +151,7 @@ class CPU {
  private:
   uint32_t next_program_counter_ = bios::kBiosBase + kInstructionLength;
   uint32_t program_counter_ = bios::kBiosBase;
+  uint32_t current_program_counter_;
   std::array<uint32_t, kNumberOfRegisters> read_registers_{};
   std::array<uint32_t, kNumberOfRegisters> write_registers_ = read_registers_;
   LoadDelaySlots load_delay_slots_{};
@@ -154,6 +168,7 @@ class CPU {
   void Store8(uint32_t address, uint8_t value);
 
   void Branch(uint32_t offset);
+  void Exception(ExceptionType cause);
 
   void OpSPECIAL(const Instruction& instruction);
   void OpSLL(const Instruction& instruction);
@@ -161,6 +176,7 @@ class CPU {
   void OpSRA(const Instruction& instruction);
   void OpJR(const Instruction& instruction);
   void OpJALR(const Instruction& instruction);
+  void OpSYSCALL(const Instruction& instruction);
   void OpMFHI(const Instruction& instruction);
   void OpMFLO(const Instruction& instruction);
   void OpDIV(const Instruction& instruction);

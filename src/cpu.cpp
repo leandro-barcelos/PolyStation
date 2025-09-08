@@ -14,6 +14,15 @@ bool cpu::COP0::IsCacheIsolated() const {
   return (status_register_ & 0x10000) != 0U;
 }
 
+cpu::COP0::HandlerAddress cpu::COP0::GetHandlerAddress() const {
+  return (status_register_ >> 22U) != 0U ? COP0::HandlerAddress::kKSEG1
+                                         : COP0::HandlerAddress::kKSEG0;
+}
+
+cpu::Mode cpu::COP0::GetMode() {
+  return static_cast<Mode>((status_register_ & 0x3U) == 1);
+}
+
 uint32_t cpu::COP0::GetCauseRegister() const { return cause_register_; }
 
 void cpu::COP0::SetCauseRegister(const uint32_t value) {
@@ -33,6 +42,9 @@ void cpu::CPU::Reset() {
 
 void cpu::CPU::Cycle() {
   const auto instruction = Instruction(Load32(program_counter_));
+
+  current_program_counter_ = program_counter_;
+
   program_counter_ = next_program_counter_;
   next_program_counter_ += kInstructionLength;
 
@@ -186,6 +198,22 @@ void cpu::CPU::Branch(uint32_t offset) {
   next_program_counter_ -= 4;
 }
 
+void cpu::CPU::Exception(ExceptionType cause) {
+  const uint32_t handler = cop0_.GetHandlerAddress();
+
+  const Mode mode = cop0_.GetMode();
+  cop0_.SetStatusRegister(cop0_.GetStatusRegister() & 0x3U);
+  cop0_.SetStatusRegister(cop0_.GetStatusRegister() |
+                          ((static_cast<uint32_t>(mode) << 2) & 0x3f));
+
+  cop0_.SetCauseRegister(static_cast<uint32_t>(cause) << 2);
+
+  cop0_.SetEpcRegister(current_program_counter_);
+
+  program_counter_ = handler;
+  next_program_counter_ = program_counter_ + kInstructionLength;
+}
+
 void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
   switch (instruction.GetSecondaryOpcode()) {
     case Instruction::SecondaryOpcode::kSLL:
@@ -202,6 +230,9 @@ void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
       break;
     case Instruction::SecondaryOpcode::kJALR:
       OpJALR(instruction);
+      break;
+    case Instruction::SecondaryOpcode::kSYSCALL:
+      OpSYSCALL(instruction);
       break;
     case Instruction::SecondaryOpcode::kMFHI:
       OpMFHI(instruction);
@@ -278,6 +309,10 @@ void cpu::CPU::OpJALR(const Instruction& instruction) {
 
   SetRegister(instruction.GetD(), GetNextPC());
   next_program_counter_ = register_s;
+}
+
+void cpu::CPU::OpSYSCALL([[maybe_unused]] const Instruction& instruction) {
+  Exception(ExceptionType::kSysCall);
 }
 
 void cpu::CPU::OpMFHI(const Instruction& instruction) {
@@ -723,6 +758,9 @@ std::ostream& cpu::operator<<(std::ostream& outs,
         case Instruction::SecondaryOpcode::kJALR:
           return outs << std::format("jalr R{}, R{}", instruction.GetD(),
                                      instruction.GetS());
+        case Instruction::SecondaryOpcode::kSYSCALL:
+          return outs << std::format("syscall {:08X}",
+                                     instruction.GetImmediate20());
         case Instruction::SecondaryOpcode::kMFHI:
           return outs << std::format("mfhi R{}", instruction.GetD());
         case Instruction::SecondaryOpcode::kMFLO:
