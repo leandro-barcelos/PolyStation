@@ -171,7 +171,7 @@ void app::Application::MainLoop() {
         show_error_popup_ = true;
       }
 
-      if (step_to_pc_ && cpu_.GetPrevPC() == target_pc_) {
+      if (step_to_pc_ && cpu_.GetPC() == target_pc_) {
         running_ = false;
         step_to_pc_ = false;
       }
@@ -340,9 +340,10 @@ void app::Application::DrawCPUStateWindow() const {
     // Program Counter - separate line
     ImGui::TextUnformatted("PC (Program Counter)");
     ImGui::SameLine(200);
-    ImGui::TextColored(ImVec4(1.0F, 0.8F, 0.2F, 1.0F), "0x%08X", cpu_.GetPC());
+    ImGui::TextColored(ImVec4(1.0F, 0.8F, 0.2F, 1.0F), "0x%08X",
+                       cpu_.GetNextPC());
     ImGui::SameLine(320);
-    ImGui::Text("(%u)", cpu_.GetPC());
+    ImGui::Text("(%u)", cpu_.GetNextPC());
     ImGui::Separator();
     // Register type selection
     static int register_type = 0;  // 0 = CPU registers, 1 = COP0 registers
@@ -512,7 +513,7 @@ void app::Application::DrawControlWindow() {
 void app::Application::DrawCpuDisassembler() const {
   constexpr uint32_t kMaxInstructions = 25;
 
-  const uint32_t current_pc = cpu_.GetPrevPC();
+  const uint32_t current_pc = cpu_.GetPC();
 
   ImGui::Begin("PolyStation - CPU Disassembler");
 

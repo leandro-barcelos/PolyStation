@@ -120,8 +120,8 @@ class CPU {
   [[nodiscard]] uint32_t GetRegister(uint32_t index) const;
   void SetRegister(uint32_t index, uint32_t value);
   [[nodiscard]] unsigned long long GetStepCount() const;
+  [[nodiscard]] uint32_t GetNextPC() const;
   [[nodiscard]] uint32_t GetPC() const;
-  [[nodiscard]] uint32_t GetPrevPC() const;
   [[nodiscard]] COP0 GetCop0() const;
   [[nodiscard]] uint32_t GetHI() const;
   [[nodiscard]] uint32_t GetLO() const;
@@ -129,9 +129,8 @@ class CPU {
   [[nodiscard]] uint32_t Load32(uint32_t address) const;
 
  private:
+  uint32_t next_program_counter_ = bios::kBiosBase + kInstructionLength;
   uint32_t program_counter_ = bios::kBiosBase;
-  uint32_t prev_program_counter_ = bios::kBiosBase - 4;
-  Instruction next_instruction_{0x0};
   std::array<uint32_t, kNumberOfRegisters> read_registers_{};
   std::array<uint32_t, kNumberOfRegisters> write_registers_ = read_registers_;
   LoadDelaySlots load_delay_slots_{};

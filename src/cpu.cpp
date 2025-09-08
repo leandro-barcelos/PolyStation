@@ -16,16 +16,15 @@ bool cpu::COP0::IsCacheIsolated() const {
 
 void cpu::CPU::Reset() {
   program_counter_ = bios::kBiosBase;
-  next_instruction_ = Instruction(0x0);
+  next_program_counter_ = bios::kBiosBase + kInstructionLength;
   read_registers_.fill(0);
   step_count_ = 0;
 }
 
 void cpu::CPU::Cycle() {
-  const Instruction instruction = next_instruction_;
-  next_instruction_ = Instruction(Load32(program_counter_));
-  prev_program_counter_ = program_counter_;
-  program_counter_ += kInstructionLength;
+  const auto instruction = Instruction(Load32(program_counter_));
+  program_counter_ = next_program_counter_;
+  next_program_counter_ += kInstructionLength;
 
   auto [index, value] = load_delay_slots_;
   SetRegister(index, value);
@@ -125,9 +124,9 @@ void cpu::CPU::SetRegister(const uint32_t index, const uint32_t value) {
 
 unsigned long long cpu::CPU::GetStepCount() const { return step_count_; }
 
-uint32_t cpu::CPU::GetPC() const { return program_counter_; }
+uint32_t cpu::CPU::GetNextPC() const { return next_program_counter_; }
 
-uint32_t cpu::CPU::GetPrevPC() const { return prev_program_counter_; }
+uint32_t cpu::CPU::GetPC() const { return program_counter_; }
 
 cpu::COP0 cpu::CPU::GetCop0() const { return cop0_; }
 
@@ -173,8 +172,8 @@ void cpu::CPU::Store8(const uint32_t address, const uint8_t value) {
 void cpu::CPU::Branch(uint32_t offset) {
   offset <<= 2U;
 
-  program_counter_ += offset;
-  program_counter_ -= 4;
+  next_program_counter_ += offset;
+  next_program_counter_ -= 4;
 }
 
 void cpu::CPU::OpSPECIAL(const Instruction& instruction) {
@@ -261,14 +260,14 @@ void cpu::CPU::OpSRA(const Instruction& instruction) {
 void cpu::CPU::OpJR(const Instruction& instruction) {
   const uint32_t register_s = GetRegister(instruction.GetS());
 
-  program_counter_ = register_s;
+  next_program_counter_ = register_s;
 }
 
 void cpu::CPU::OpJALR(const Instruction& instruction) {
   const uint32_t register_s = GetRegister(instruction.GetS());
 
-  SetRegister(instruction.GetD(), GetPC());
-  program_counter_ = register_s;
+  SetRegister(instruction.GetD(), GetNextPC());
+  next_program_counter_ = register_s;
 }
 
 void cpu::CPU::OpMFHI(const Instruction& instruction) {
@@ -411,11 +410,12 @@ void cpu::CPU::OpBGEZ(const Instruction& instruction) {
 void cpu::CPU::OpJ(const Instruction& instruction) {
   const uint32_t immediate = instruction.GetImmediate26();
 
-  program_counter_ = (program_counter_ & 0xF0000000) | (immediate << 2U);
+  next_program_counter_ =
+      (next_program_counter_ & 0xF0000000) | (immediate << 2U);
 }
 
 void cpu::CPU::OpJAL(const Instruction& instruction) {
-  SetRegister(kReturnAddress, GetPC());
+  SetRegister(kReturnAddress, GetNextPC());
 
   OpJ(instruction);
 }
