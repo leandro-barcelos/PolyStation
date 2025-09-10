@@ -7,6 +7,14 @@ find_package(Microsoft.GSL CONFIG REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(Vulkan REQUIRED)
 
+# spdlog configuration
+set(SPDLOG_FMT_EXTERNAL OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_EXAMPLE OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(SPDLOG_BUILD_BENCH OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/external/spdlog)
+
 # ImGUI
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/imgui)
 
@@ -53,6 +61,14 @@ add_executable(PolyStation src/main.cpp
 
 target_link_libraries(PolyStation PRIVATE
         Microsoft.GSL::GSL
+        spdlog::spdlog_header_only
         imgui
         Vulkan::Vulkan
+)
+
+# Set log levels based on build type
+target_compile_definitions(PolyStation PRIVATE
+        $<$<CONFIG:Debug>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE>
+        $<$<CONFIG:Release>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_WARN>
+        $<$<CONFIG:RelWithDebInfo>:SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_DEBUG>
 )
