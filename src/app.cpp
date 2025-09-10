@@ -8,6 +8,7 @@
 
 #include "imgui_impl_sdl2.h"
 #include "imgui_internal.h"
+#include "logger.h"
 
 #ifdef _WIN32
 #include <windows.h>  // SetProcessDPIAware()
@@ -42,9 +43,7 @@ void CheckVkResult(const VkResult err) {
   if (err == 0) {
     return;
   }
-  std::cerr << std::format("[vulkan] Error: VkResult = {}",
-                           static_cast<int>(err))
-            << '\n';
+  LOG_ERROR_VULKAN("{}", static_cast<int>(err));
   if (err < 0) {
     abort();
   }
@@ -66,7 +65,7 @@ void app::Application::Run() {
 void app::Application::InitSDL() {
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) !=
       0) {
-    throw std::runtime_error("failed to initialize SDL2!");
+    throw std::runtime_error("Failed to initialize SDL2!");
   }
 
   // From 2.0.18: Enable native IME.
@@ -83,7 +82,7 @@ void app::Application::InitSDL() {
                              static_cast<int>(1280 * main_scale),
                              static_cast<int>(720 * main_scale), kWindowFlags);
   if (window_ == nullptr) {
-    throw std::runtime_error("failed to create window!");
+    throw std::runtime_error("Failed to create window");
   }
 }
 
@@ -816,7 +815,7 @@ void app::Application::CreateInstance() {
   create_info.ppEnabledExtensionNames = required_extensions.data();
 
   if (vkCreateInstance(&create_info, nullptr, &instance_) != VK_SUCCESS) {
-    throw std::runtime_error("failed to create instance!");
+    throw std::runtime_error("Failed to create instance");
   }
 }
 
@@ -830,13 +829,13 @@ void app::Application::SetupDebugMessenger() {
 
   if (CreateDebugMessengerEXT(instance_, &create_info, nullptr,
                               &debug_messenger_) != VK_SUCCESS) {
-    throw std::runtime_error("failed to set up debug messenger!");
+    throw std::runtime_error("Failed to set up debug messenger");
   }
 }
 
 void app::Application::CreateSurface() {
   if (SDL_Vulkan_CreateSurface(window_, instance_, &surface_) == 0) {
-    throw std::runtime_error("failed to create window surface!");
+    throw std::runtime_error("Failed to create window surface");
   }
 }
 
@@ -884,7 +883,7 @@ void app::Application::CreateLogicalDevice() {
   create_info.ppEnabledExtensionNames = device_extensions.Data;
   if (vkCreateDevice(physical_device_, &create_info, nullptr, &device_) !=
       VK_SUCCESS) {
-    throw std::runtime_error("failed to create logical device!");
+    throw std::runtime_error("Failed to create logical device!");
   }
 
   vkGetDeviceQueue(device_, queue_family_, 0, &queue_);
@@ -907,7 +906,7 @@ void app::Application::CreateDescriptorPool() {
   pool_info.pPoolSizes = kPoolSizes.data();
   if (vkCreateDescriptorPool(device_, &pool_info, nullptr, &descriptor_pool_) !=
       VK_SUCCESS) {
-    throw std::runtime_error("failed to create descriptor pool!");
+    throw std::runtime_error("Failed to create descriptor pool");
   }
 }
 
@@ -919,7 +918,7 @@ void app::Application::SetupVulkanWindow() {
   vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, queue_family_,
                                        main_window_data_.Surface, &res);
   if (res != VK_TRUE) {
-    throw std::runtime_error("Error no WSI support on physical device");
+    throw std::runtime_error("No WSI support on physical device");
   }
 
   // Select Surface Format
@@ -982,7 +981,21 @@ VKAPI_ATTR VkBool32 VKAPI_CALL app::Application::DebugCallback(
     [[maybe_unused]] VkDebugUtilsMessageTypeFlagsEXT message_type,
     const VkDebugUtilsMessengerCallbackDataEXT* p_callback_data,
     [[maybe_unused]] void* p_user_data) {
-  std::cerr << "validation layer: " << p_callback_data->pMessage << '\n';
+  switch (message_severity) {
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+      LOG_TRACE_VULKAN("{}", p_callback_data->pMessage);
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+      LOG_INFO_VULKAN("{}", p_callback_data->pMessage);
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+      LOG_WARN_VULKAN("{}", p_callback_data->pMessage);
+      break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+    default:
+      LOG_ERROR_VULKAN("{}", p_callback_data->pMessage);
+      break;
+  }
   return VK_FALSE;
 }
 

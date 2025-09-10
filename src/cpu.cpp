@@ -4,6 +4,8 @@
 #include <gsl/gsl>
 #include <iostream>
 
+#include "logger.h"
+
 uint32_t cpu::COP0::GetStatusRegister() const { return status_register_; }
 
 void cpu::COP0::SetStatusRegister(const uint32_t value) {
@@ -166,7 +168,7 @@ uint8_t cpu::CPU::Load8(const uint32_t address) const {
 
 void cpu::CPU::Store32(const uint32_t address, const uint32_t value) {
   if (cop0_.IsCacheIsolated()) {
-    std::cout << "ignoring store while cache is isolated" << '\n';
+    LOG_INFO_CPU("Ignoring store while cache is isolated");
     return;
   }
 
@@ -175,7 +177,7 @@ void cpu::CPU::Store32(const uint32_t address, const uint32_t value) {
 
 void cpu::CPU::Store16(const uint32_t address, const uint16_t value) {
   if (cop0_.IsCacheIsolated()) {
-    std::cout << "ignoring store while cache is isolated" << '\n';
+    LOG_INFO_CPU("Ignoring store while cache is isolated");
     return;
   }
 
@@ -184,7 +186,7 @@ void cpu::CPU::Store16(const uint32_t address, const uint16_t value) {
 
 void cpu::CPU::Store8(const uint32_t address, const uint8_t value) {
   if (cop0_.IsCacheIsolated()) {
-    std::cout << "ignoring store while cache is isolated" << '\n';
+    LOG_INFO_CPU("Ignoring store while cache is isolated");
     return;
   }
 
@@ -585,9 +587,7 @@ void cpu::CPU::OpMFC0(const Instruction& instruction) {
       break;
     case COP0::Registers::kCAUSE:
     case COP0::Registers::kEPC:
-      std::cout << std::format("unhandled read from cop0r{}",
-                               instruction.GetD())
-                << '\n';
+      LOG_INFO_CPU("Unhandled read from cop0r{}", instruction.GetD());
     default:
       throw std::runtime_error(
           std::format("unhandled cop0 register {}", instruction.GetD()));
@@ -608,7 +608,7 @@ void cpu::CPU::OpMTC0(const Instruction& instruction) {
     case COP0::Registers::kBDAM:
     case COP0::Registers::kBPCM:
     case COP0::Registers::kCAUSE:
-      std::cout << "ignoring write to debug COP0 register" << '\n';
+      LOG_INFO_CPU("Ignoring write to debug COP0 register");
       break;
     default:
       throw std::runtime_error(
@@ -618,7 +618,7 @@ void cpu::CPU::OpMTC0(const Instruction& instruction) {
 
 void cpu::CPU::OpLB(const Instruction& instruction) {
   if (cop0_.IsCacheIsolated()) {
-    std::cout << "ignoring load while cache is isolated" << '\n';
+    LOG_INFO_CPU("Ignoring load while cache is isolated");
     return;
   }
 
@@ -634,7 +634,7 @@ void cpu::CPU::OpLB(const Instruction& instruction) {
 
 void cpu::CPU::OpLW(const Instruction& instruction) {
   if (cop0_.IsCacheIsolated()) {
-    std::cout << "ignoring load while cache is isolated" << '\n';
+    LOG_INFO_CPU("Ignoring load while cache is isolated");
     return;
   }
 
@@ -649,7 +649,7 @@ void cpu::CPU::OpLW(const Instruction& instruction) {
 
 void cpu::CPU::OpLBU(const Instruction& instruction) {
   if (cop0_.IsCacheIsolated()) {
-    std::cout << "ignoring load while cache is isolated" << '\n';
+    LOG_INFO_CPU("Ignoring load while cache is isolated");
     return;
   }
 

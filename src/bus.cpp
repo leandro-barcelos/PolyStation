@@ -4,6 +4,8 @@
 #include <gsl/util>
 #include <iostream>
 
+#include "logger.h"
+
 bool bus::MemoryRange::InRange(const uint32_t address) const {
   return address >= base && address < base + size;
 }
@@ -73,7 +75,7 @@ uint32_t bus::Bus::Load32(uint32_t address) const {
       return ram_.Load32(offset);
     }
     case MemoryRegion::kInterruptControl:
-      std::cout << "unhandled read at interrupt control" << '\n';
+      LOG_INFO_BUS("Unhandled read at Interrupt Control");
       return 0;
     default:
       throw std::runtime_error(
@@ -139,15 +141,15 @@ void bus::Bus::Store32(uint32_t address, uint32_t value) {
           }
           break;
         default:
-          std::cout << "unhandled write to memory control 1" << '\n';
+          LOG_INFO_BUS("Unhandled write to Memory Control");
           break;
       }
       break;
     case MemoryRegion::kRamSize:
-      std::cout << "unhandled write to RAM_SIZE" << '\n';
+      LOG_INFO_BUS("Unhandled write to RAM_SIZE");
       break;
     case MemoryRegion::kCacheControl:
-      std::cout << "unhandled write to Cache Control register" << '\n';
+      LOG_INFO_BUS("Unhandled write to Cache Control");
       break;
     case MemoryRegion::kRam: {
       const uint32_t offset = address - kRamMemoryRange.base;
@@ -155,10 +157,10 @@ void bus::Bus::Store32(uint32_t address, uint32_t value) {
       break;
     }
     case MemoryRegion::kSpuControl:
-      std::cout << "unhandled write to SPU control registers" << '\n';
+      LOG_INFO_BUS("Unhandled write to SPU Control");
       break;
     case MemoryRegion::kInterruptControl:
-      std::cout << "unhandled write to interrupt control registers" << '\n';
+      LOG_INFO_BUS("Unhandled write to Interrupt Control");
       break;
     default:
       throw std::runtime_error(
@@ -183,10 +185,10 @@ void bus::Bus::Store16(uint32_t address, uint16_t value) {
 
   switch (region.value()) {
     case MemoryRegion::kSpuControl:
-      std::cout << "unhandled write to SPU control registers" << '\n';
+      LOG_INFO_BUS("Unhandled write to SPU Control");
       break;
     case MemoryRegion::kTimers:
-      std::cout << "unhandled write to timers registers" << '\n';
+      LOG_INFO_BUS("Unhandled write to timers registers");
       break;
     default:
       throw std::runtime_error(
@@ -206,8 +208,7 @@ void bus::Bus::Store8(uint32_t address, uint8_t value) {
 
   switch (region.value()) {
     case MemoryRegion::kExpansionRegion2IntDipPost:
-      std::cout << "unhandled write to Expansion Region 2 (Int/Dip/Post)"
-                << '\n';
+      LOG_INFO_BUS("Unhandled write to Expansion Region 2 (Int/Dip/Post)");
       break;
     case MemoryRegion::kRam: {
       const uint32_t offset = address - kRamMemoryRange.base;

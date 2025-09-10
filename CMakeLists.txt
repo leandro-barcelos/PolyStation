@@ -57,7 +57,9 @@ add_executable(PolyStation src/main.cpp
         src/app.cpp
         src/app.h
         src/ram.cpp
-        src/ram.h)
+        src/ram.h
+        src/logger.cpp
+        src/logger.h)
 
 target_link_libraries(PolyStation PRIVATE
         Microsoft.GSL::GSL
