@@ -21,7 +21,7 @@ cpu::COP0::HandlerAddress cpu::COP0::GetHandlerAddress() const {
                                          : COP0::HandlerAddress::kKSEG0;
 }
 
-cpu::Mode cpu::COP0::GetMode() {
+cpu::Mode cpu::COP0::GetMode() const {
   return static_cast<Mode>((status_register_ & 0x3U) == 1);
 }
 

@@ -113,7 +113,7 @@ struct COP0 {
   void SetStatusRegister(uint32_t value);
   [[nodiscard]] bool IsCacheIsolated() const;
   [[nodiscard]] HandlerAddress GetHandlerAddress() const;
-  Mode GetMode();
+  Mode GetMode() const;
 
   [[nodiscard]] uint32_t GetCauseRegister() const;
   void SetCauseRegister(uint32_t value);
