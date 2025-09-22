@@ -105,7 +105,10 @@ void app::Application::InitImGui() const {
       ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
   im_gui_io.ConfigFlags |=
       ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
-  im_gui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+  if constexpr (!kEnableSimplifiedUI) {
+    im_gui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+  }
 
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
@@ -208,11 +211,15 @@ void app::Application::RenderFrame() {
   ImGui_ImplSDL2_NewFrame();
   ImGui::NewFrame();
 
-  SetupDockingLayout();
+  if constexpr (kEnableSimplifiedUI) {
+    DrawSimplifiedUI();
+  } else {
+    SetupDockingLayout();
+    DrawCPUStateWindow();
+    DrawControlWindow();
+    DrawCpuDisassembler();
+  }
 
-  DrawCPUStateWindow();
-  DrawControlWindow();
-  DrawCpuDisassembler();
   DrawMainViewWindow();
   DrawErrorPopup();
 
@@ -329,6 +336,56 @@ void app::Application::PresentFrame() {
   }
   main_window_data_.SemaphoreIndex =
       (main_window_data_.SemaphoreIndex + 1) % main_window_data_.SemaphoreCount;
+}
+
+void app::Application::DrawSimplifiedUI() {
+  const ImGuiViewport* viewport = ImGui::GetMainViewport();
+  const float window_width = viewport->WorkSize.x;
+  const float window_height = ImGui::GetTextLineHeightWithSpacing() +
+                              ImGui::GetStyle().WindowPadding.y * 2;
+
+  ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y),
+                          ImGuiCond_Always);
+  ImGui::SetNextWindowSize(ImVec2(window_width, window_height),
+                           ImGuiCond_Always);
+
+  if (ImGui::Begin("PolyStation - Controls", nullptr,
+                   ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                       ImGuiWindowFlags_NoTitleBar)) {
+    const float button_width = 80.0f;
+    const float spacing = 10.0f;
+
+    // Status (left)
+    ImGui::Text("Status: %s", running_ ? "Running" : "Paused");
+
+    // Calculate center position for buttons
+    const float buttons_total_width = (button_width * 2) + spacing;
+    const float center_start = (window_width - buttons_total_width) * 0.5f;
+
+    ImGui::SameLine(center_start);
+
+    // Run/Pause button (center)
+    if (const auto* control_btn_label = !running_ ? "Run" : "Pause";
+        ImGui::Button(control_btn_label, ImVec2(button_width, 0.0))) {
+      running_ = !running_;
+    }
+    ImGui::SameLine();
+
+    // Reset button (center)
+    if (ImGui::Button("Reset", ImVec2(button_width, 0.0)) && !running_) {
+      cpu_.Reset();
+      target_pc_ = bios::kBiosBase;
+    }
+
+    // FPS (right)
+    const std::string fps_text =
+        std::format("FPS: {:.1f}", ImGui::GetIO().Framerate);
+    const float fps_width = ImGui::CalcTextSize(fps_text.c_str()).x;
+    ImGui::SameLine(window_width - fps_width);
+    ImGui::Text("%s", fps_text.c_str());
+  }
+
+  ImGui::End();
 }
 
 void app::Application::DrawCPUStateWindow() const {
@@ -634,7 +691,20 @@ void app::Application::DrawErrorPopup() {
 }
 
 void app::Application::DrawMainViewWindow() {
-  if (ImGui::Begin("PolyStation - Display")) {
+  if (kEnableSimplifiedUI) {
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    const float top_bar_height = ImGui::GetTextLineHeightWithSpacing() +
+                                 ImGui::GetStyle().WindowPadding.y * 2;
+
+    ImGui::SetNextWindowPos(
+        ImVec2(viewport->WorkPos.x, viewport->WorkPos.y + top_bar_height));
+    ImGui::SetNextWindowSize(
+        ImVec2(viewport->WorkSize.x, viewport->WorkSize.y - top_bar_height));
+  }
+
+  if (ImGui::Begin("PolyStation - Display", nullptr,
+                   ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
+                       ImGuiWindowFlags_NoTitleBar)) {
   }
   ImGui::End();
 }

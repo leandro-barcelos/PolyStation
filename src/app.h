@@ -14,8 +14,10 @@
 
 #ifdef NDEBUG
 constexpr bool kEnableValidationLayers = false;
+constexpr bool kEnableSimplifiedUI = true;
 #else
 constexpr bool kEnableValidationLayers = true;
+constexpr bool kEnableSimplifiedUI = false;
 #endif
 
 VkResult CreateDebugMessengerEXT(
@@ -88,6 +90,7 @@ class Application {
   static void DrawMainViewWindow();
   static void SetupDockingLayout();
   static void DrawTableCell(const char* reg_name, uint32_t reg_value);
+  void DrawSimplifiedUI();
 
   [[nodiscard]] std::vector<const char*> GetRequiredExtensions() const;
   static bool IsExtensionAvailable(
